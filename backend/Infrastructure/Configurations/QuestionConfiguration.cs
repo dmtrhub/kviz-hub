@@ -1,4 +1,4 @@
-﻿using KvizHub.Domain.Quizzes;
+﻿using KvizHub.Domain.Entities.Quizzes;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -18,15 +18,8 @@ public class QuestionConfiguration : IEntityTypeConfiguration<Question>
             .HasConversion<string>()
             .IsRequired();
 
-        builder.Property(q => q.Points)
-            .IsRequired();
-
-        builder.Property(q => q.Order)
-            .IsRequired();
-
-        builder.HasMany(q => q.Options)
-            .WithOne(a => a.Question)
-            .HasForeignKey(a => a.QuestionId)
-            .OnDelete(DeleteBehavior.Cascade);
+        builder.HasOne(q => q.Quiz)
+            .WithMany(qz => qz.Questions)
+            .HasForeignKey(q => q.QuizId);
     }
 }

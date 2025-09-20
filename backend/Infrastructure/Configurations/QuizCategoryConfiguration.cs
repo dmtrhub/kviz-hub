@@ -1,4 +1,4 @@
-﻿using KvizHub.Domain.Quizzes;
+﻿using KvizHub.Domain.Entities.Quizzes;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -12,12 +12,10 @@ public class QuizCategoryConfiguration : IEntityTypeConfiguration<QuizCategory>
 
         builder.HasOne(qc => qc.Quiz)
             .WithMany(q => q.QuizCategories)
-            .HasForeignKey(qc => qc.QuizId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .HasForeignKey(qc => qc.QuizId);
 
         builder.HasOne(qc => qc.Category)
-            .WithMany(c => c.QuizCategories)
-            .HasForeignKey(qc => qc.CategoryId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .WithMany(c => c.Quizzes)
+            .HasForeignKey(qc => qc.CategoryId);
     }
 }

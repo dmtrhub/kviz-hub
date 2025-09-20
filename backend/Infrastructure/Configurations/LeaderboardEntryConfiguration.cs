@@ -1,4 +1,4 @@
-﻿using KvizHub.Domain.Quizzes;
+﻿using KvizHub.Domain.Entities.Quizzes;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -13,15 +13,15 @@ public class LeaderboardEntryConfiguration : IEntityTypeConfiguration<Leaderboar
         builder.Property(le => le.Score)
             .IsRequired();
 
-        builder.Property(le => le.CompletedAt)
+        builder.Property(le => le.AchievedAt)
             .IsRequired();
 
-        builder.Property(le => le.TimeTaken)
-            .HasConversion(
-                v => v.Ticks,
-                v => TimeSpan.FromTicks(v))
-            .IsRequired();
+        builder.HasOne(le => le.User)
+            .WithMany(u => u.LeaderboardEntries)
+            .HasForeignKey(le => le.UserId);
 
-        builder.HasIndex(le => new { le.QuizId, le.Score, le.TimeTaken });
+        builder.HasOne(le => le.Quiz)
+            .WithMany(q => q.LeaderboardEntries)
+            .HasForeignKey(le => le.QuizId);
     }
 }

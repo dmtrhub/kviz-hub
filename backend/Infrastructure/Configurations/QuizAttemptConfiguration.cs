@@ -1,4 +1,4 @@
-﻿using KvizHub.Domain.Quizzes;
+﻿using KvizHub.Domain.Entities.Quizzes;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -13,12 +13,12 @@ public class QuizAttemptConfiguration : IEntityTypeConfiguration<QuizAttempt>
         builder.Property(qa => qa.StartedAt)
             .IsRequired();
 
-        builder.Property(qa => qa.ScorePercentage)
-            .HasColumnType("decimal(5,2)");
+        builder.HasOne(qa => qa.User)
+            .WithMany(u => u.QuizAttempts)
+            .HasForeignKey(qa => qa.UserId);
 
-        builder.HasMany(qa => qa.UserAnswers)
-            .WithOne(ua => ua.Attempt)
-            .HasForeignKey(ua => ua.AttemptId)
-            .OnDelete(DeleteBehavior.Cascade);
+        builder.HasOne(qa => qa.Quiz)
+            .WithMany(q => q.QuizAttempts)
+            .HasForeignKey(qa => qa.QuizId);
     }
 }

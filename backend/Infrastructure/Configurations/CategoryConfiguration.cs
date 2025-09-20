@@ -1,4 +1,4 @@
-﻿using KvizHub.Domain.Quizzes;
+﻿using KvizHub.Domain.Entities.Quizzes;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

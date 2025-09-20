@@ -1,4 +1,4 @@
-﻿using KvizHub.Domain.Quizzes;
+﻿using KvizHub.Domain.Entities.Quizzes;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -10,7 +10,14 @@ public class UserAnswerDetailConfiguration : IEntityTypeConfiguration<UserAnswer
     {
         builder.HasKey(ad => ad.Id);
 
-        builder.Property(ad => ad.TextAnswer)
-            .HasMaxLength(500);
+        builder.HasOne(ad => ad.UserAnswer)
+               .WithMany(ua => ua.AnswerDetails)
+               .HasForeignKey(ad => ad.UserAnswerId)
+               .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne(ad => ad.AnswerOption)
+               .WithMany()
+               .HasForeignKey(ad => ad.AnswerOptionId)
+               .OnDelete(DeleteBehavior.Restrict);
     }
 }

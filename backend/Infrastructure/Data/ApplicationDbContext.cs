@@ -1,13 +1,10 @@
-﻿using KvizHub.Domain.Quizzes;
-using KvizHub.Domain.Users;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using KvizHub.Domain.Entities.Quizzes;
+using KvizHub.Domain.Entities.Users;
 using Microsoft.EntityFrameworkCore;
-using System.Reflection;
 
 namespace KvizHub.Infrastructure.Data;
 
-public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<Guid>, Guid>
+public class ApplicationDbContext : DbContext
 {
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
         : base(options) { }
@@ -21,28 +18,12 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<Guid>, 
     public DbSet<UserAnswer> UserAnswers { get; set; }
     public DbSet<UserAnswerDetail> UserAnswerDetails { get; set; }
     public DbSet<LeaderboardEntry> LeaderboardEntries { get; set; }
+    public DbSet<User> Users { get; set; }
 
-    protected override void OnModelCreating(ModelBuilder builder)
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        base.OnModelCreating(builder);
+        base.OnModelCreating(modelBuilder);
 
-        builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
-
-        ConfigureIdentityTables(builder);
-    }
-
-    private static void ConfigureIdentityTables(ModelBuilder builder)
-    {
-        builder.Entity<User>(entity =>
-            entity.ToTable("Users")
-        );
-
-        builder.Entity<IdentityRole<Guid>>(entity =>
-            entity.ToTable("Roles")
-        );
-
-        builder.Entity<IdentityUserRole<Guid>>(entity =>
-            entity.ToTable("UserRoles")
-        );
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
     }
 }

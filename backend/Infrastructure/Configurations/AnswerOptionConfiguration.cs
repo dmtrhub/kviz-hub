@@ -1,4 +1,4 @@
-﻿using KvizHub.Domain.Quizzes;
+﻿using KvizHub.Domain.Entities.Quizzes;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -17,7 +17,8 @@ public class AnswerOptionConfiguration : IEntityTypeConfiguration<AnswerOption>
         builder.Property(a => a.IsCorrect)
             .IsRequired();
 
-        builder.Property(a => a.Order)
-            .IsRequired();
+        builder.HasOne(a => a.Question)
+            .WithMany(q => q.AnswerOptions)
+            .HasForeignKey(a => a.QuestionId);
     }
 }

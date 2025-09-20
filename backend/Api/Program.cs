@@ -1,17 +1,32 @@
-using KvizHub.Infrastructure.Extensions;
+using FluentValidation.AspNetCore;
+using KvizHub.Api.Extensions;
+using KvizHub.Application;
+using KvizHub.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddOpenApi();
-builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services
+    .AddSwaggerDocumentation()
+    .AddInfrastructure(builder.Configuration)
+    .AddJwtAuthentication(builder.Configuration)
+    .AddApplication(builder.Configuration);
+
+builder.Services.AddControllers();
+
+builder.Services.AddFluentValidationAutoValidation();
 
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
-    await app.Services.ApplyMigrationsAsync();
+    app.UseSwaggerDocumentation();
 }
 
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.MapControllers();
+
 app.Run();

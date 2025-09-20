@@ -1,4 +1,4 @@
-﻿using KvizHub.Domain.Quizzes;
+﻿using KvizHub.Domain.Entities.Quizzes;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -10,28 +10,14 @@ public class UserAnswerConfiguration : IEntityTypeConfiguration<UserAnswer>
     {
         builder.HasKey(ua => ua.Id);
 
-        builder.Property(ua => ua.AnsweredAt)
-            .IsRequired();
-
-        builder.Property(ua => ua.TimeTaken)
-            .HasConversion(
-                v => v.Ticks,
-                v => TimeSpan.FromTicks(v));
-
         builder.HasOne(ua => ua.Question)
             .WithMany(q => q.UserAnswers)
             .HasForeignKey(ua => ua.QuestionId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        builder.HasOne(ua => ua.Attempt)
+        builder.HasOne(ua => ua.QuizAttempt)
             .WithMany(a => a.UserAnswers)
-            .HasForeignKey(ua => ua.AttemptId)
+            .HasForeignKey(ua => ua.QuizAttemptId)
             .OnDelete(DeleteBehavior.Cascade);
-
-        builder.HasMany(ua => ua.AnswerDetails)
-            .WithOne(ad => ad.UserAnswer)
-            .HasForeignKey(ad => ad.UserAnswerId)
-            .OnDelete(DeleteBehavior.Cascade);
-
     }
 }
