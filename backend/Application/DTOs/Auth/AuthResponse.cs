@@ -2,5 +2,6 @@
 
 public record AuthResponse(
     string Token,
-    DateTime Expiration
+    DateTime Expiration,
+    UserResponse User
 );

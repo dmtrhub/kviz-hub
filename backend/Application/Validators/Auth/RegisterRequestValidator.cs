@@ -26,9 +26,10 @@ public class RegisterRequestValidator : AbstractValidator<RegisterRequest>
             .Matches("[0-9]").WithMessage("Lozinka mora sadržati bar jedan broj")
             .Matches("[^a-zA-Z0-9]").WithMessage("Lozinka mora sadržati bar jedan specijalni karakter");
 
-        RuleFor(x => x.AvatarUrl)
-            .Must(uri => Uri.TryCreate(uri, UriKind.Absolute, out _))
-            .WithMessage("Nevažeći URL formata avatara")
-            .When(x => !string.IsNullOrEmpty(x.AvatarUrl));
+        RuleFor(x => x.Avatar)
+            .Must(file => file == null || file.ContentType.StartsWith("image/"))
+            .WithMessage("Avatar mora biti slika")
+            .Must(file => file == null || file.Length <= 2_000_000)
+            .WithMessage("Avatar mora biti manji od 2MB");
     }
 }

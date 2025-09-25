@@ -6,4 +6,5 @@ public record UserResponse
     public string Username { get; init; } = default!;
     public string Email { get; init; } = default!;
     public string? AvatarUrl { get; init; }
+    public string Role { get; set; } = "User";
 }

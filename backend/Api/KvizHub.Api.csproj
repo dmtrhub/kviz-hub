@@ -24,7 +24,6 @@
   <ItemGroup>
     <ProjectReference Include="..\Application\KvizHub.Application.csproj" />
     <ProjectReference Include="..\Infrastructure\KvizHub.Infrastructure.csproj" />
-    <ProjectReference Include="..\SharedKernel\SharedKernel.csproj" />
   </ItemGroup>
 
 </Project>

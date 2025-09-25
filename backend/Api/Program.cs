@@ -1,4 +1,4 @@
-using FluentValidation.AspNetCore;
+﻿using FluentValidation.AspNetCore;
 using KvizHub.Api.Extensions;
 using KvizHub.Application;
 using KvizHub.Infrastructure;
@@ -9,7 +9,8 @@ builder.Services
     .AddSwaggerDocumentation()
     .AddInfrastructure(builder.Configuration)
     .AddJwtAuthentication(builder.Configuration)
-    .AddApplication(builder.Configuration);
+    .AddApplication(builder.Configuration)
+    .AddCorsConfiguration(builder.Configuration);
 
 builder.Services.AddControllers();
 
@@ -21,6 +22,10 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwaggerDocumentation();
 }
+
+app.UseCorsConfiguration();
+
+app.UseStaticFiles();
 
 app.UseHttpsRedirection();
 

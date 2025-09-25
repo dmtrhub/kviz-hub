@@ -20,7 +20,11 @@ public class AuthService : IAuthService
     private readonly IMapper _mapper;
     private readonly IConfiguration _configuration;
 
-    public AuthService(IUserRepository userRepository, IUnitOfWork unitOfWork, IMapper mapper, IConfiguration configuration)
+    public AuthService(
+        IUserRepository userRepository,
+        IUnitOfWork unitOfWork,
+        IMapper mapper,
+        IConfiguration configuration)
     {
         _userRepository = userRepository;
         _unitOfWork = unitOfWork;
@@ -28,7 +32,7 @@ public class AuthService : IAuthService
         _configuration = configuration;
     }
 
-    public async Task<UserResponse> RegisterAsync(RegisterRequest request)
+    public async Task<AuthResponse> RegisterAsync(RegisterRequest request)
     {
         if (await _userRepository.ExistsByUsernameAsync(request.Username))
             throw new Exception("Username already exists.");
@@ -41,15 +45,31 @@ public class AuthService : IAuthService
         // Hash lozinke
         user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
 
+        // Upload avatara (ako postoji)
+        if (request.Avatar != null)
+        {
+            var fileName = $"{Guid.NewGuid()}_{request.Avatar.FileName}";
+            var filePath = Path.Combine("wwwroot", "avatars", fileName);
+
+            Directory.CreateDirectory(Path.GetDirectoryName(filePath)!);
+
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await request.Avatar.CopyToAsync(stream);
+            }
+
+            user.AvatarUrl = $"/avatars/{fileName}";
+        }
+
         await _userRepository.AddAsync(user);
         await _unitOfWork.SaveChangesAsync();
-        return _mapper.Map<UserResponse>(user);
+
+        return GenerateJwtToken(user);
     }
 
     public async Task<AuthResponse> LoginAsync(LoginRequest request)
     {
-        var user = await _userRepository
-            .FindByUsernameOrEmailAsync(request.Identifier);
+        var user = await _userRepository.FindByUsernameOrEmailAsync(request.Identifier);
 
         if (user == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
             throw new Exception("Invalid credentials.");
@@ -85,6 +105,8 @@ public class AuthService : IAuthService
 
         var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
 
-        return new AuthResponse(tokenString, expiration);
+        var userResponse = _mapper.Map<UserResponse>(user);
+
+        return new AuthResponse(tokenString, expiration, userResponse);
     }
 }
