@@ -11,12 +11,22 @@ public static class ApplicationDI
 {
     public static IServiceCollection AddApplication(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddScoped<IAuthService, AuthService>();
+        AddServices(services);
 
         services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 
         services.AddAutoMapper(Assembly.GetExecutingAssembly());
 
         return services;
+    }
+
+    private static void AddServices(IServiceCollection services)
+    {
+        services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<IQuizService, QuizService>();
+        services.AddScoped<ICategoryService, CategoryService>();
+        services.AddScoped<IQuestionService, QuestionService>();
+        services.AddScoped<IQuizAttemptService, QuizAttemptService>();
+        services.AddScoped<ILeaderboardService, LeaderboardService>();
     }
 }

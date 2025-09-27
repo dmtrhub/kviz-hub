@@ -8,5 +8,5 @@ public class UserAnswer
     public int QuizAttemptId { get; set; }
     public QuizAttempt QuizAttempt { get; set; } = default!;
 
-    public ICollection<UserAnswerDetail> AnswerDetails { get; set; } = [];
+    public ICollection<UserAnswerDetail> AnswerDetails { get; set; } = new List<UserAnswerDetail>();
 }

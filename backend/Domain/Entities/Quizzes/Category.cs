@@ -6,5 +6,5 @@ public class Category
     public string Name { get; set; } = default!;
     public string Description { get; set; } = default!;
 
-    public ICollection<QuizCategory> Quizzes { get; set; } = [];
+    public ICollection<QuizCategory> Quizzes { get; set; } = new List<QuizCategory>();
 }

@@ -111,6 +111,9 @@ namespace KvizHub.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("Points")
+                        .HasColumnType("int");
+
                     b.Property<int>("QuizId")
                         .HasColumnType("int");
 
@@ -144,6 +147,9 @@ namespace KvizHub.Infrastructure.Migrations
                         .HasColumnType("nvarchar(1000)");
 
                     b.Property<int>("Difficulty")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TimeLimit")
                         .HasColumnType("int");
 
                     b.Property<string>("Title")

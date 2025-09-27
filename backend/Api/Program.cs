@@ -1,9 +1,14 @@
 ﻿using FluentValidation.AspNetCore;
 using KvizHub.Api.Extensions;
+using KvizHub.Api.Middleware;
 using KvizHub.Application;
 using KvizHub.Infrastructure;
+using KvizHub.Infrastructure.Data;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddControllers();
+builder.Services.AddFluentValidationAutoValidation();
 
 builder.Services
     .AddSwaggerDocumentation()
@@ -12,25 +17,30 @@ builder.Services
     .AddApplication(builder.Configuration)
     .AddCorsConfiguration(builder.Configuration);
 
-builder.Services.AddControllers();
-
-builder.Services.AddFluentValidationAutoValidation();
-
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    var seeder = new DataSeeder(dbContext);
+    await seeder.SeedAsync();
+}
 
 if (app.Environment.IsDevelopment())
 {
     app.UseSwaggerDocumentation();
 }
 
-app.UseCorsConfiguration();
+app.UseHttpsRedirection();
 
 app.UseStaticFiles();
 
-app.UseHttpsRedirection();
+app.UseCorsConfiguration();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseMiddleware<ErrorHandlerMiddleware>();
 
 app.MapControllers();
 

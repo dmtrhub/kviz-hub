@@ -17,5 +17,8 @@ public class QuizConfiguration : IEntityTypeConfiguration<Quiz>
         builder.Property(q => q.Description)
                .IsRequired()
                .HasMaxLength(1000);
+
+        builder.Property(q => q.TimeLimit)
+               .IsRequired();
     }
 }

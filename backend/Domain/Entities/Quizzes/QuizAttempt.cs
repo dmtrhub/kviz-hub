@@ -1,4 +1,5 @@
 ﻿using KvizHub.Domain.Entities.Users;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace KvizHub.Domain.Entities.Quizzes;
 
@@ -15,5 +16,8 @@ public class QuizAttempt
     public Guid UserId { get; set; }
     public User User { get; set; } = default!;
 
-    public ICollection<UserAnswer> UserAnswers { get; set; } = [];
+    public ICollection<UserAnswer> UserAnswers { get; set; } = new List<UserAnswer>();
+
+    [NotMapped]
+    public bool IsFinished => FinishedAt.HasValue;
 }

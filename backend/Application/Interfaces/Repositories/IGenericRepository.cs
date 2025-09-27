@@ -19,4 +19,6 @@ public interface IGenericRepository<TEntity> where TEntity : class
     void Remove(TEntity entity);
 
     void RemoveRange(IEnumerable<TEntity> entities);
+
+    IQueryable<TEntity> Query();
 }

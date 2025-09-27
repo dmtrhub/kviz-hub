@@ -30,4 +30,6 @@ public class GenericRepository<TEntity> : IGenericRepository<TEntity> where TEnt
     public void Remove(TEntity entity) => _dbSet.Remove(entity);
 
     public void RemoveRange(IEnumerable<TEntity> entities) => _dbSet.RemoveRange(entities);
+
+    public IQueryable<TEntity> Query() => _dbSet.AsQueryable();
 }

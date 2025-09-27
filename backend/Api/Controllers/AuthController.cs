@@ -2,45 +2,44 @@
 using KvizHub.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
-namespace KvizHub.Api.Controllers
+namespace KvizHub.Api.Controllers;
+
+[ApiController]
+[Route("api/auth")]
+public class AuthController : ControllerBase
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    public class AuthController : ControllerBase
+    private readonly IAuthService _authService;
+
+    public AuthController(IAuthService authService)
     {
-        private readonly IAuthService _authService;
+        _authService = authService;
+    }
 
-        public AuthController(IAuthService authService)
+    [HttpPost("register")]
+    public async Task<IActionResult> Register([FromForm] RegisterRequest request)
+    {
+        try
         {
-            _authService = authService;
+            var response = await _authService.RegisterAsync(request);
+            return Ok(response);
         }
-
-        [HttpPost("register")]
-        public async Task<IActionResult> Register([FromForm] RegisterRequest request)
+        catch (Exception ex)
         {
-            try
-            {
-                var response = await _authService.RegisterAsync(request);
-                return Ok(response);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
+            return BadRequest(new { message = ex.Message });
         }
+    }
 
-        [HttpPost("login")]
-        public async Task<IActionResult> Login(LoginRequest request)
+    [HttpPost("login")]
+    public async Task<IActionResult> Login(LoginRequest request)
+    {
+        try
         {
-            try
-            {
-                var response = await _authService.LoginAsync(request);
-                return Ok(response);
-            }
-            catch (Exception ex)
-            {
-                return Unauthorized(new { message = ex.Message });
-            }
+            var response = await _authService.LoginAsync(request);
+            return Ok(response);
+        }
+        catch (Exception ex)
+        {
+            return Unauthorized(new { message = ex.Message });
         }
     }
 }

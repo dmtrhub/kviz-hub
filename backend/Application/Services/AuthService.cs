@@ -15,18 +15,15 @@ namespace KvizHub.Application.Services;
 
 public class AuthService : IAuthService
 {
-    private readonly IUserRepository _userRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
     private readonly IConfiguration _configuration;
 
     public AuthService(
-        IUserRepository userRepository,
         IUnitOfWork unitOfWork,
         IMapper mapper,
         IConfiguration configuration)
     {
-        _userRepository = userRepository;
         _unitOfWork = unitOfWork;
         _mapper = mapper;
         _configuration = configuration;
@@ -34,9 +31,9 @@ public class AuthService : IAuthService
 
     public async Task<AuthResponse> RegisterAsync(RegisterRequest request)
     {
-        if (await _userRepository.ExistsByUsernameAsync(request.Username))
+        if (await _unitOfWork.Users.ExistsByUsernameAsync(request.Username))
             throw new Exception("Username already exists.");
-        if (await _userRepository.ExistsByEmailAsync(request.Email))
+        if (await _unitOfWork.Users.ExistsByEmailAsync(request.Email))
             throw new Exception("Email already exists.");
 
         // Mapiranje
@@ -61,7 +58,7 @@ public class AuthService : IAuthService
             user.AvatarUrl = $"/avatars/{fileName}";
         }
 
-        await _userRepository.AddAsync(user);
+        await _unitOfWork.Users.AddAsync(user);
         await _unitOfWork.SaveChangesAsync();
 
         return GenerateJwtToken(user);
@@ -69,7 +66,7 @@ public class AuthService : IAuthService
 
     public async Task<AuthResponse> LoginAsync(LoginRequest request)
     {
-        var user = await _userRepository.FindByUsernameOrEmailAsync(request.Identifier);
+        var user = await _unitOfWork.Users.FindByUsernameOrEmailAsync(request.Identifier);
 
         if (user == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
             throw new Exception("Invalid credentials.");
@@ -92,8 +89,7 @@ public class AuthService : IAuthService
             new Claim(ClaimTypes.Role, user.Role.ToString())
         };
 
-        var expiryHours = _configuration.GetValue<int>("Jwt:ExpiryHours");
-        var expiration = DateTime.UtcNow.AddHours(expiryHours);
+        var expiration = DateTime.UtcNow.AddHours(_configuration.GetValue<int>("Jwt:ExpiryHours"));
 
         var token = new JwtSecurityToken(
             issuer: _configuration["Jwt:Issuer"],
