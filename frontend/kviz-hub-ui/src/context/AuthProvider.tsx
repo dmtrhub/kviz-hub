@@ -8,15 +8,19 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const { auth } = useServices();
   const [user, setUser] = useState<FrontendUser | null>(null);
   const [loading, setLoading] = useState(false);
+const [initializing, setInitializing] = useState(true);
 
-  // učitaj iz localStorage pri startu
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    const userStr = localStorage.getItem('user');
-    if (token && userStr) {
-      setUser(JSON.parse(userStr));
-    }
-  }, []);
+useEffect(() => {
+  const token = localStorage.getItem('token');
+  const userStr = localStorage.getItem('user');
+  if (token && userStr) {
+    setUser(JSON.parse(userStr));
+  }
+  setInitializing(false);
+}, []);
+
+if (initializing) return <div>Loading...</div>;
+
 
   const login = async (dto: LoginRequest) => {
     setLoading(true);
