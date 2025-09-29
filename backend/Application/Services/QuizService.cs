@@ -21,6 +21,7 @@ public class QuizService : IQuizService
     public async Task<IEnumerable<QuizResponse>> GetQuizzesAsync(QuizFilterRequest filter)
     {
         var query = _unitOfWork.Quizzes.Query()
+            .Include(q => q.Questions)
             .Include(q => q.QuizCategories)
                 .ThenInclude(qc => qc.Category)
             .Include(q => q.Questions)
@@ -42,6 +43,8 @@ public class QuizService : IQuizService
     public async Task<QuizResponse?> GetQuizByIdAsync(int id)
     {
         var quiz = await _unitOfWork.Quizzes.Query()
+            .Include(q => q.Questions)
+                .ThenInclude(q => q.AnswerOptions)
             .Include(q => q.QuizCategories)
                 .ThenInclude(qc => qc.Category)
             .Include(q => q.Questions)
@@ -67,7 +70,6 @@ public class QuizService : IQuizService
         await _unitOfWork.Quizzes.AddAsync(quiz);
         await _unitOfWork.SaveChangesAsync();
 
-        // Ponovo učitaj kviz sa uključivanjima za response
         quiz = await _unitOfWork.Quizzes.Query()
             .Include(q => q.QuizCategories)
                 .ThenInclude(qc => qc.Category)
@@ -91,21 +93,28 @@ public class QuizService : IQuizService
         quiz.Difficulty = request.Difficulty;
         quiz.TimeLimit = request.TimeLimit;
 
-        // Update categories
         if (request.CategoryIds != null)
         {
-            // Remove old categories not in the new list
-            quiz.QuizCategories.ToList().RemoveAll(qc => !request.CategoryIds.Contains(qc.CategoryId));
+            var currentCategoryIds = quiz.QuizCategories.Select(qc => qc.CategoryId).ToList();
+            var newCategoryIds = request.CategoryIds.ToList();
 
-            // Add new categories
-            var existingCategoryIds = quiz.QuizCategories.Select(qc => qc.CategoryId).ToList();
-            var toAdd = request.CategoryIds.Except(existingCategoryIds)
-                .Select(cid => new QuizCategory { CategoryId = cid, QuizId = quiz.Id });
-
-            quiz.QuizCategories.ToList().AddRange(toAdd);
+            if (!currentCategoryIds.SequenceEqual(newCategoryIds))
+            {
+                foreach (var existingCategory in quiz.QuizCategories.ToList())
+                {
+                    _unitOfWork.QuizCategories.Remove(existingCategory);
+                }
+                foreach (var categoryId in newCategoryIds)
+                {
+                    quiz.QuizCategories.Add(new QuizCategory
+                    {
+                        QuizId = quiz.Id,
+                        CategoryId = categoryId
+                    });
+                }
+            }
         }
 
-        _unitOfWork.Quizzes.Update(quiz);
         await _unitOfWork.SaveChangesAsync();
 
         quiz = await _unitOfWork.Quizzes.Query()

@@ -4,6 +4,7 @@ using KvizHub.Api.Middleware;
 using KvizHub.Application;
 using KvizHub.Infrastructure;
 using KvizHub.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,9 +22,31 @@ var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
 {
-    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    var seeder = new DataSeeder(dbContext);
-    await seeder.SeedAsync();
+    try
+    {
+        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+        await context.Database.MigrateAsync();
+        Console.WriteLine("✅ Database migrated successfully!");
+
+        if (!await context.Users.AnyAsync())
+        {
+            Console.WriteLine("🌱 Seeding database...");
+
+            var seeder = scope.ServiceProvider.GetRequiredService<DataSeeder>();
+            await seeder.SeedAsync();
+
+            Console.WriteLine("✅ Database seeded successfully!");
+        }
+        else
+        {
+            Console.WriteLine("✅ Database already has data. Skipping seed.");
+        }
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"⚠️ Database setup failed: {ex.Message}");
+    }
 }
 
 if (app.Environment.IsDevelopment())

@@ -14,6 +14,9 @@ public class UnitOfWork : IUnitOfWork
     public IGenericRepository<QuizAttempt> QuizAttempts { get; }
     public IGenericRepository<UserAnswer> UserAnswers { get; }
     public IGenericRepository<LeaderboardEntry> LeaderboardEntries { get; }
+    public IGenericRepository<QuizCategory> QuizCategories { get; }
+    public IGenericRepository<UserAnswerDetail> UserAnswerDetails { get; }
+    public IGenericRepository<AnswerOption> AnswerOptions { get; }
 
     public UnitOfWork(ApplicationDbContext context)
     {
@@ -26,6 +29,9 @@ public class UnitOfWork : IUnitOfWork
         QuizAttempts = new GenericRepository<QuizAttempt>(_context);
         UserAnswers = new GenericRepository<UserAnswer>(_context);
         LeaderboardEntries = new GenericRepository<LeaderboardEntry>(_context);
+        QuizCategories = new GenericRepository<QuizCategory>(_context);
+        UserAnswerDetails = new GenericRepository<UserAnswerDetail>(_context);
+        AnswerOptions = new GenericRepository<AnswerOption>(_context);
     }
 
     public async Task<int> SaveChangesAsync() => await _context.SaveChangesAsync();

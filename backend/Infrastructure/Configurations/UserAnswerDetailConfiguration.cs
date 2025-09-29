@@ -13,11 +13,11 @@ public class UserAnswerDetailConfiguration : IEntityTypeConfiguration<UserAnswer
         builder.HasOne(ad => ad.UserAnswer)
                .WithMany(ua => ua.AnswerDetails)
                .HasForeignKey(ad => ad.UserAnswerId)
-               .OnDelete(DeleteBehavior.Restrict);
+               .OnDelete(DeleteBehavior.ClientCascade);
 
         builder.HasOne(ad => ad.AnswerOption)
                .WithMany()
                .HasForeignKey(ad => ad.AnswerOptionId)
-               .OnDelete(DeleteBehavior.Restrict);
+               .OnDelete(DeleteBehavior.Cascade);
     }
 }

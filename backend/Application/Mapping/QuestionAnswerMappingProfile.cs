@@ -10,7 +10,8 @@ public class QuestionAnswerMappingProfile : Profile
     public QuestionAnswerMappingProfile()
     {
         // Question
-        CreateMap<Question, QuestionResponse>().ReverseMap();
+        CreateMap<Question, QuestionResponse>()
+            .ForMember(dest => dest.Type, opt => opt.MapFrom(src => src.Type));
         CreateMap<CreateQuestionRequest, Question>();
         CreateMap<UpdateQuestionRequest, Question>();
 

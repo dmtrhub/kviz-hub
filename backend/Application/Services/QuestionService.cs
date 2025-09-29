@@ -31,10 +31,42 @@ public class QuestionService : IQuestionService
 
     public async Task<bool> DeleteQuestionAsync(int id)
     {
-        var question = await _unitOfWork.Questions.GetByIdAsync(id);
+        var question = await _unitOfWork.Questions.Query()
+            .Include(q => q.AnswerOptions)
+            .Include(q => q.UserAnswers)
+            .FirstOrDefaultAsync(q => q.Id == id);
+
         if (question == null) return false;
 
+        var answerOptionIds = question.AnswerOptions.Select(ao => ao.Id).ToList();
+        var userAnswerDetailsForOptions = await _unitOfWork.UserAnswerDetails.Query()
+            .Where(uad => answerOptionIds.Contains(uad.AnswerOptionId))
+            .ToListAsync();
+
+        if (userAnswerDetailsForOptions.Any())
+        {
+            _unitOfWork.UserAnswerDetails.RemoveRange(userAnswerDetailsForOptions);
+        }
+
+        var userAnswerIds = question.UserAnswers?.Select(ua => ua.Id).ToList() ?? new List<int>();
+        var userAnswerDetailsForUserAnswers = await _unitOfWork.UserAnswerDetails.Query()
+            .Where(uad => userAnswerIds.Contains(uad.UserAnswerId))
+            .ToListAsync();
+
+        if (userAnswerDetailsForUserAnswers.Any())
+        {
+            _unitOfWork.UserAnswerDetails.RemoveRange(userAnswerDetailsForUserAnswers);
+        }
+
+        if (question.UserAnswers?.Any() == true)
+        {
+            _unitOfWork.UserAnswers.RemoveRange(question.UserAnswers);
+        }
+
+        _unitOfWork.AnswerOptions.RemoveRange(question.AnswerOptions);
+
         _unitOfWork.Questions.Remove(question);
+
         await _unitOfWork.SaveChangesAsync();
         return true;
     }

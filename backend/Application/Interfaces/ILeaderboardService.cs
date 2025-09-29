@@ -4,7 +4,7 @@ namespace KvizHub.Application.Interfaces;
 
 public interface ILeaderboardService
 {
-    Task<IEnumerable<LeaderboardEntryResponse>> GetQuizLeaderboardAsync(int quizId, int top = 10);
+    Task<LeaderboardResponse> GetLeaderboardAsync(LeaderboardFilter filter);
 
-    Task<IEnumerable<LeaderboardEntryResponse>> GetGlobalLeaderboardAsync(int? quizId = null, DateTime? from = null, DateTime? to = null, int top = 10);
+    Task<LeaderboardResponse> GetUserRankAsync(Guid userId, LeaderboardFilter filter);
 }

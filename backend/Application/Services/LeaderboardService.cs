@@ -17,56 +17,64 @@ public class LeaderboardService : ILeaderboardService
         _mapper = mapper;
     }
 
-    public async Task<IEnumerable<LeaderboardEntryResponse>> GetQuizLeaderboardAsync(int quizId, int top = 10)
-    {
-        var entries = await _unitOfWork.LeaderboardEntries.Query()
-            .Include(e => e.User)
-            .Include(e => e.Quiz)
-            .Where(e => e.QuizId == quizId)
-            .OrderByDescending(e => e.Score)
-            .ThenBy(e => e.AchievedAt)
-            .Take(top)
-            .ToListAsync();
-
-        var response = _mapper.Map<List<LeaderboardEntryResponse>>(entries);
-
-        for (int i = 0; i < response.Count; i++)
-        {
-            response[i].Rank = i + 1;
-        }
-
-        return response;
-    }
-
-    public async Task<IEnumerable<LeaderboardEntryResponse>> GetGlobalLeaderboardAsync(int? quizId = null, DateTime? from = null, DateTime? to = null, int top = 10)
+    public async Task<LeaderboardResponse> GetLeaderboardAsync(LeaderboardFilter filter)
     {
         var query = _unitOfWork.LeaderboardEntries.Query()
-            .Include(e => e.User)
-            .Include(e => e.Quiz)
+            .Include(le => le.Quiz)
+            .ThenInclude(q => q.Questions)
+            .Include(le => le.User)
+            .OrderByDescending(le => le.Score)
+            .ThenBy(le => le.Duration)
             .AsQueryable();
 
-        if (quizId.HasValue)
-            query = query.Where(e => e.QuizId == quizId.Value);
+        if (filter.QuizId.HasValue && filter.QuizId.Value > 0)
+            query = query.Where(e => e.QuizId == filter.QuizId.Value);
 
-        if (from.HasValue)
-            query = query.Where(e => e.AchievedAt >= from.Value);
-
-        if (to.HasValue)
-            query = query.Where(e => e.AchievedAt <= to.Value);
+        if (filter.TimePeriod != "all")
+        {
+            var now = DateTime.UtcNow;
+            var startDate = filter.TimePeriod switch
+            {
+                "weekly" => now.AddDays(-7),
+                "monthly" => now.AddDays(-30),
+                _ => now.AddYears(-100) // all time
+            };
+            query = query.Where(e => e.AchievedAt >= startDate);
+        }
 
         var entries = await query
             .OrderByDescending(e => e.Score)
             .ThenBy(e => e.AchievedAt)
-            .Take(top)
+            .Take(filter.Top ?? 50)
             .ToListAsync();
 
-        var response = _mapper.Map<List<LeaderboardEntryResponse>>(entries);
+        var responseEntries = _mapper.Map<List<LeaderboardEntryResponse>>(entries);
 
-        for (int i = 0; i < response.Count; i++)
+        for (int i = 0; i < responseEntries.Count; i++)
         {
-            response[i].Rank = i + 1;
+            responseEntries[i].Position = i + 1;
+
+            responseEntries[i].Duration = entries[i].Duration;
         }
 
-        return response;
+        return new LeaderboardResponse
+        {
+            Entries = responseEntries,
+            TotalCount = responseEntries.Count
+        };
+    }
+
+    public async Task<LeaderboardResponse> GetUserRankAsync(Guid userId, LeaderboardFilter filter)
+    {
+        var leaderboardResponse = await GetLeaderboardAsync(filter);
+
+        var userEntry = leaderboardResponse.Entries
+            .FirstOrDefault(e => e.UserId == userId.ToString());
+
+        return new LeaderboardResponse
+        {
+            Entries = userEntry != null ? new List<LeaderboardEntryResponse> { userEntry } : new List<LeaderboardEntryResponse>(),
+            TotalCount = userEntry != null ? 1 : 0
+        };
     }
 }

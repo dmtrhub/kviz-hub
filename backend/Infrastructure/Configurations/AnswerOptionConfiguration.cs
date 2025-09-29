@@ -19,6 +19,7 @@ public class AnswerOptionConfiguration : IEntityTypeConfiguration<AnswerOption>
 
         builder.HasOne(a => a.Question)
             .WithMany(q => q.AnswerOptions)
-            .HasForeignKey(a => a.QuestionId);
+            .HasForeignKey(a => a.QuestionId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

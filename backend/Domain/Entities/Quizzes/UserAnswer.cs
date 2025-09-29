@@ -7,6 +7,8 @@ public class UserAnswer
     public Question Question { get; set; } = default!;
     public int QuizAttemptId { get; set; }
     public QuizAttempt QuizAttempt { get; set; } = default!;
+    public string TextAnswer { get; set; } = string.Empty;
+    public bool IsCorrect { get; set; }
 
     public ICollection<UserAnswerDetail> AnswerDetails { get; set; } = new List<UserAnswerDetail>();
 }

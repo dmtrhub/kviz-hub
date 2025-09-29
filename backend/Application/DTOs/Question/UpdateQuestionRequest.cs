@@ -5,7 +5,7 @@ namespace KvizHub.Application.DTOs.Question;
 
 public record UpdateQuestionRequest(
     string Text,
-    QuestionType Type,
+    string Type,
     int Points,
     IEnumerable<UpdateAnswerOptionRequest> AnswerOptions
 );

@@ -8,6 +8,7 @@ public class LeaderboardEntry
     public int Score { get; set; }
     public DateTime AchievedAt { get; set; } = DateTime.UtcNow;
     public int Rank { get; set; }
+    public int Duration { get; set; } // in minutes
 
     public Guid UserId { get; set; }
     public User User { get; set; } = default!;

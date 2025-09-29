@@ -15,6 +15,7 @@ public static class InfrastructureDI
             options.UseSqlServer(configuration.GetConnectionString("KvizHub")));
 
         services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services.AddScoped<DataSeeder>();
 
         return services;
     }

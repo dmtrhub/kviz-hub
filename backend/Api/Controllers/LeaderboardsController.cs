@@ -2,6 +2,7 @@
 using KvizHub.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace KvizHub.Api.Controllers;
 
@@ -17,22 +18,23 @@ public class LeaderboardController : ControllerBase
         _leaderboardService = leaderboardService;
     }
 
-    [HttpGet("quiz/{quizId}")]
-    public async Task<ActionResult<IEnumerable<LeaderboardEntryResponse>>> GetQuizLeaderboard(int quizId, [FromQuery] int top = 10)
+    // GET: api/leaderboard
+    [HttpGet]
+    public async Task<IActionResult> GetLeaderboard([FromQuery] LeaderboardFilter filter)
     {
-        var leaderboard = await _leaderboardService.GetQuizLeaderboardAsync(quizId, top);
+        var leaderboard = await _leaderboardService.GetLeaderboardAsync(filter);
         return Ok(leaderboard);
     }
 
-    [HttpGet]
-    [Authorize(Roles = "Admin")]
-    public async Task<ActionResult<IEnumerable<LeaderboardEntryResponse>>> GetGlobalLeaderboard(
-        [FromQuery] int? quizId = null,
-        [FromQuery] DateTime? from = null,
-        [FromQuery] DateTime? to = null,
-        [FromQuery] int top = 10)
+    // GET: api/leaderboard/me
+    [HttpGet("me")]
+    public async Task<IActionResult> GetMyRank([FromQuery] LeaderboardFilter filter)
     {
-        var leaderboard = await _leaderboardService.GetGlobalLeaderboardAsync(quizId, from, to, top);
-        return Ok(leaderboard);
+        var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
+            return Unauthorized();
+
+        var myRank = await _leaderboardService.GetUserRankAsync(userId, filter);
+        return Ok(myRank);
     }
 }

@@ -2,5 +2,6 @@
 
 public record UserAnswerRequest(
     int QuestionId,
-    IEnumerable<int> SelectedAnswerOptionIds
+    IEnumerable<int>? SelectedAnswerOptionIds = null,
+    string? TextAnswer = null
 );

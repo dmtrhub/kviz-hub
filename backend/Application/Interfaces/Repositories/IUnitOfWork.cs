@@ -12,6 +12,9 @@ public interface IUnitOfWork : IDisposable
     IGenericRepository<QuizAttempt> QuizAttempts { get; }
     IGenericRepository<UserAnswer> UserAnswers { get; }
     IGenericRepository<LeaderboardEntry> LeaderboardEntries { get; }
+    IGenericRepository<QuizCategory> QuizCategories { get; }
+    IGenericRepository<UserAnswerDetail> UserAnswerDetails { get; }
+    IGenericRepository<AnswerOption> AnswerOptions { get; }
 
     Task<int> SaveChangesAsync();
 }
