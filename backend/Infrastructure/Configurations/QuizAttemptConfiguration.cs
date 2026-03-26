@@ -10,6 +10,12 @@ public class QuizAttemptConfiguration : IEntityTypeConfiguration<QuizAttempt>
     {
         builder.HasKey(qa => qa.Id);
 
+        builder.HasIndex(qa => new { qa.UserId, qa.FinishedAt })
+            .HasDatabaseName("IX_QuizAttempts_User_FinishedAt");
+
+        builder.HasIndex(qa => new { qa.QuizId, qa.UserId, qa.FinishedAt })
+            .HasDatabaseName("IX_QuizAttempts_Quiz_User_FinishedAt");
+
         builder.Property(qa => qa.StartedAt)
             .IsRequired();
 

@@ -9,20 +9,13 @@ namespace KvizHub.Api.Controllers;
 [ApiController]
 [Route("api/leaderboards")]
 [Authorize]
-public class LeaderboardController : ControllerBase
+public class LeaderboardController(ILeaderboardService leaderboardService) : ControllerBase
 {
-    private readonly ILeaderboardService _leaderboardService;
-
-    public LeaderboardController(ILeaderboardService leaderboardService)
-    {
-        _leaderboardService = leaderboardService;
-    }
-
     // GET: api/leaderboard
     [HttpGet]
     public async Task<IActionResult> GetLeaderboard([FromQuery] LeaderboardFilter filter)
     {
-        var leaderboard = await _leaderboardService.GetLeaderboardAsync(filter);
+        var leaderboard = await leaderboardService.GetLeaderboardAsync(filter);
         return Ok(leaderboard);
     }
 
@@ -34,7 +27,7 @@ public class LeaderboardController : ControllerBase
         if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
             return Unauthorized();
 
-        var myRank = await _leaderboardService.GetUserRankAsync(userId, filter);
+        var myRank = await leaderboardService.GetUserRankAsync(userId, filter);
         return Ok(myRank);
     }
 }

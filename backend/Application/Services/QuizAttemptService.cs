@@ -2,247 +2,180 @@
 using KvizHub.Application.DTOs.MyResults;
 using KvizHub.Application.DTOs.QuizAttempt;
 using KvizHub.Application.DTOs.UserAnswer;
+using KvizHub.Application.Exceptions;
 using KvizHub.Application.Interfaces;
 using KvizHub.Application.Interfaces.Repositories;
 using KvizHub.Domain.Entities.Quizzes;
 using KvizHub.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 
-public class QuizAttemptService : IQuizAttemptService
+namespace KvizHub.Application.Services;
+
+public sealed class QuizAttemptService(IUnitOfWork unitOfWork, IMapper mapper) : IQuizAttemptService
 {
-    private readonly IUnitOfWork _unitOfWork;
-    private readonly IMapper _mapper;
-
-    public QuizAttemptService(IUnitOfWork unitOfWork, IMapper mapper)
-    {
-        _unitOfWork = unitOfWork;
-        _mapper = mapper;
-    }
-
     public async Task<QuizAttemptResponse> CreateAttemptAsync(int quizId, Guid userId)
     {
-        var existingAttempt = await _unitOfWork.QuizAttempts.Query()
+        var quizExists = await unitOfWork.Quizzes.Query()
+            .AsNoTracking()
+            .AnyAsync(q => q.Id == quizId);
+
+        if (!quizExists)
+        {
+            throw new NotFoundException("Quiz not found.");
+        }
+
+        var existingAttempt = await unitOfWork.QuizAttempts.Query()
+            .AsNoTracking()
             .FirstOrDefaultAsync(a => a.QuizId == quizId && a.UserId == userId && a.FinishedAt == null);
 
         if (existingAttempt != null)
-        {
-            return _mapper.Map<QuizAttemptResponse>(existingAttempt);
-        }
+            return mapper.Map<QuizAttemptResponse>(existingAttempt);
 
         var attempt = new QuizAttempt
         {
             QuizId = quizId,
             UserId = userId,
-            StartedAt = DateTime.UtcNow
+            StartedAt = DateTime.UtcNow,
+            UserAnswers = []
         };
 
-        await _unitOfWork.QuizAttempts.AddAsync(attempt);
-        await _unitOfWork.SaveChangesAsync();
+        await unitOfWork.QuizAttempts.AddAsync(attempt);
+        await unitOfWork.SaveChangesAsync();
 
-        return _mapper.Map<QuizAttemptResponse>(attempt);
+        return mapper.Map<QuizAttemptResponse>(attempt);
     }
 
     public async Task<QuizAttemptResponse?> FinishAttemptAsync(int attemptId, FinishQuizAttemptRequest request, Guid userId)
     {
-        var attempt = await _unitOfWork.QuizAttempts.Query()
-            .Include(a => a.Quiz)
-                .ThenInclude(q => q.Questions)
-                    .ThenInclude(q => q.AnswerOptions)
-            .FirstOrDefaultAsync(a => a.Id == attemptId && a.UserId == userId);
+        var attempt = await GetAttemptQuery(asNoTracking: false)
+            .FirstOrDefaultAsync(a => a.Id == attemptId);
 
-        if (attempt == null || attempt.FinishedAt != null) return null;
+        if (attempt == null) return null;
 
-        attempt.UserAnswers?.Clear();
-
-        int totalScore = 0;
-
-        foreach (var answerRequest in request.Answers)
+        if (attempt.UserId != userId)
         {
-            var question = attempt.Quiz.Questions.FirstOrDefault(q => q.Id == answerRequest.QuestionId);
-            if (question == null) continue;
-
-            bool isCorrect = CheckAnswerCorrectness(question, answerRequest);
-            int points = isCorrect ? question.Points : 0;
-
-            if (isCorrect)
-            {
-                totalScore += points;
-            }
-
-            var userAnswer = new UserAnswer
-            {
-                QuestionId = question.Id,
-                QuizAttemptId = attempt.Id,
-                TextAnswer = answerRequest.TextAnswer ?? string.Empty,
-                IsCorrect = isCorrect,
-                AnswerDetails = new List<UserAnswerDetail>()
-            };
-
-            if (question.Type != QuestionType.FillInBlank)
-            {
-                foreach (var optionId in answerRequest.SelectedAnswerOptionIds)
-                {
-                    userAnswer.AnswerDetails.Add(new UserAnswerDetail
-                    {
-                        AnswerOptionId = optionId
-                    });
-                }
-            }
-
-            attempt.UserAnswers.Add(userAnswer);
+            throw new ForbiddenException("You do not have permission to finish this attempt.");
         }
 
-        attempt.Score = totalScore;
-        attempt.FinishedAt = DateTime.UtcNow;
+        if (attempt.FinishedAt != null) return null;
 
-        await UpdateLeaderboard(attempt.QuizId, attempt.UserId, totalScore, attempt.FinishedAt.Value);
-        await _unitOfWork.SaveChangesAsync();
+        await unitOfWork.BeginTransactionAsync();
+
+        try
+        {
+            attempt.UserAnswers.Clear();
+            int totalScore = 0;
+            var questionsById = attempt.Quiz.Questions.ToDictionary(q => q.Id);
+
+            foreach (var answerRequest in request.Answers ?? [])
+            {
+                var hasSelectedOptions = answerRequest.SelectedAnswerOptionIds?.Any() == true;
+                var hasTextAnswer = !string.IsNullOrWhiteSpace(answerRequest.TextAnswer);
+                if (!hasSelectedOptions && !hasTextAnswer) continue;
+
+                if (!questionsById.TryGetValue(answerRequest.QuestionId, out var question)) continue;
+
+                bool isCorrect = CheckAnswerCorrectness(question, answerRequest);
+                if (isCorrect) totalScore += question.Points;
+
+                var userAnswer = new UserAnswer
+                {
+                    QuestionId = question.Id,
+                    QuizAttemptId = attempt.Id,
+                    TextAnswer = answerRequest.TextAnswer ?? string.Empty,
+                    IsCorrect = isCorrect,
+                    AnswerDetails = question.Type == QuestionType.FillInBlank
+                        ? []
+                        : (answerRequest.SelectedAnswerOptionIds ?? [])
+                            .Select(id => new UserAnswerDetail { AnswerOptionId = id })
+                            .ToList()
+                };
+
+                attempt.UserAnswers.Add(userAnswer);
+            }
+
+            attempt.Score = totalScore;
+            attempt.FinishedAt = DateTime.UtcNow;
+
+            await UpdateLeaderboard(attempt.QuizId, attempt.UserId, totalScore, attempt.FinishedAt.Value);
+            await unitOfWork.SaveChangesAsync();
+            await unitOfWork.CommitTransactionAsync();
+        }
+        catch
+        {
+            await unitOfWork.RollbackTransactionAsync();
+            throw;
+        }
 
         return await GetAttemptByIdAsync(attemptId, userId);
     }
 
     public async Task<QuizAttemptResponse?> GetActiveAttemptAsync(int quizId, Guid userId)
     {
-        var activeAttempt = await _unitOfWork.QuizAttempts.Query()
-            .Include(a => a.Quiz)
-                .ThenInclude(q => q.Questions)
-                    .ThenInclude(q => q.AnswerOptions)
-            .Include(a => a.UserAnswers)
-                .ThenInclude(ua => ua.AnswerDetails)
-                    .ThenInclude(ad => ad.AnswerOption)
-            .Include(a => a.UserAnswers)
-                .ThenInclude(ua => ua.Question)
+        var activeAttempt = await GetAttemptQuery(asNoTracking: true)
             .Where(a => a.QuizId == quizId && a.UserId == userId && a.FinishedAt == null)
             .OrderByDescending(a => a.StartedAt)
             .FirstOrDefaultAsync();
 
-        return activeAttempt != null ? _mapper.Map<QuizAttemptResponse>(activeAttempt) : null;
+        return activeAttempt == null ? null : mapper.Map<QuizAttemptResponse>(activeAttempt);
     }
 
     public async Task<IEnumerable<QuizAttemptResponse>> GetUserAttemptsAsync(Guid userId)
     {
-        var attempts = await _unitOfWork.QuizAttempts.Query()
-            .Include(a => a.Quiz)
-                .ThenInclude(q => q.Questions)
-            .Include(a => a.UserAnswers)
-                .ThenInclude(ua => ua.AnswerDetails)
-                    .ThenInclude(ad => ad.AnswerOption)
-            .Include(a => a.UserAnswers)
-                .ThenInclude(ua => ua.Question)
+        var attempts = await unitOfWork.QuizAttempts.Query()
+            .AsNoTracking()
             .Where(a => a.UserId == userId)
             .ToListAsync();
 
-        return _mapper.Map<IEnumerable<QuizAttemptResponse>>(attempts);
+        return await BuildAttemptResponsesAsync(attempts);
     }
 
     public async Task<QuizAttemptResponse?> GetAttemptByIdAsync(int attemptId, Guid userId)
     {
-        var attempt = await _unitOfWork.QuizAttempts.Query()
-            .Include(a => a.Quiz)
-                .ThenInclude(q => q.Questions)
-                    .ThenInclude(q => q.AnswerOptions)
-            .Include(a => a.UserAnswers)
-                .ThenInclude(ua => ua.AnswerDetails)
-                    .ThenInclude(ad => ad.AnswerOption)
-            .Include(a => a.UserAnswers)
-                .ThenInclude(ua => ua.Question)
-            .FirstOrDefaultAsync(a => a.Id == attemptId && a.UserId == userId);
+        var attempt = await GetAttemptQuery(asNoTracking: true)
+            .FirstOrDefaultAsync(a => a.Id == attemptId);
 
         if (attempt == null) return null;
 
-        return new QuizAttemptResponse(
-            Id: attempt.Id,
-            QuizId: attempt.QuizId,
-            UserId: attempt.UserId,
-            Score: attempt.Score,
-            TotalQuestions: attempt.Quiz?.Questions?.Count ?? 0,
-            CorrectAnswers: attempt.UserAnswers?.Count(ua => ua.IsCorrect) ?? 0,
-            StartedAt: attempt.StartedAt,
-            FinishedAt: attempt.FinishedAt,
-            Answers: attempt.UserAnswers?.Select(ua => new UserAnswerResponse(
-                QuestionId: ua.QuestionId,
-                QuestionText: ua.Question?.Text ?? "[Unknown question]",
-                QuestionType: ua.Question?.Type.ToString() ?? "Unknown",
-                IsCorrect: ua.IsCorrect,
-                Points: ua.IsCorrect ? (ua.Question?.Points ?? 1) : 0,
-                SelectedOptionIds: ua.AnswerDetails?.Select(ad => ad.AnswerOptionId).ToList() ?? new List<int>(),
-                TextAnswer: ua.TextAnswer,
-                Details: GetAnswerDetails(ua)
-            )).ToList() ?? new List<UserAnswerResponse>()
-        );
+        if (attempt.UserId != userId)
+        {
+            throw new ForbiddenException("You do not have permission to access this attempt.");
+        }
+
+        return mapper.Map<QuizAttemptResponse>(attempt);
     }
 
     public async Task<List<MyQuizResultDto>> GetUserResultsAsync(Guid userId)
     {
-        var attempts = await _unitOfWork.QuizAttempts.Query()
-            .Include(a => a.Quiz)
-                .ThenInclude(q => q.Questions)
-            .Include(a => a.UserAnswers)
+        var attempts = await GetAttemptSummaryQuery()
             .Where(a => a.UserId == userId && a.FinishedAt != null)
             .OrderByDescending(a => a.FinishedAt)
             .ToListAsync();
 
-        var results = new List<MyQuizResultDto>();
-
-        foreach (var attempt in attempts)
-        {
-            var totalQuestions = attempt.Quiz?.Questions.Count ?? 0;
-            var correctAnswers = CalculateCorrectAnswers(attempt.UserAnswers);
-            var percentage = totalQuestions > 0
-                ? (int)Math.Round((double)correctAnswers / totalQuestions * 100)
-                : 0;
-            var duration = attempt.FinishedAt.HasValue
-                ? (int)(attempt.FinishedAt.Value - attempt.StartedAt).TotalMinutes
-                : 0;
-
-            results.Add(new MyQuizResultDto(
-                AttemptId: attempt.Id,
-                QuizId: attempt.QuizId,
-                QuizTitle: attempt.Quiz?.Title ?? "[Unknown Quiz]",
-                Score: attempt.Score,
-                MaxScore: totalQuestions,
-                Percentage: percentage,
-                CorrectAnswers: correctAnswers,
-                TotalQuestions: totalQuestions,
-                StartedAt: attempt.StartedAt,
-                FinishedAt: attempt.FinishedAt!.Value,
-                Duration: duration
-            ));
-        }
-
-        return results;
+        return mapper.Map<List<MyQuizResultDto>>(attempts);
     }
 
     public async Task<List<QuizProgressDto>> GetUserProgressAsync(Guid userId)
     {
-        var quizAttempts = await _unitOfWork.QuizAttempts.Query()
+        var quizAttempts = await GetAttemptSummaryQuery()
             .Where(a => a.UserId == userId)
-            .Include(a => a.Quiz)
-                .ThenInclude(q => q.Questions)
-            .Include(a => a.UserAnswers)
-                .ThenInclude(ua => ua.AnswerDetails)
-                    .ThenInclude(ad => ad.AnswerOption)
             .ToListAsync();
 
         var progressList = new List<QuizProgressDto>();
 
-        var groupedByQuiz = quizAttempts.GroupBy(a => a.Quiz).ToList();
-
-        foreach (var quizGroup in groupedByQuiz)
+        foreach (var quizGroup in quizAttempts.GroupBy(a => a.QuizId))
         {
             var attempts = quizGroup.OrderBy(a => a.StartedAt).ToList();
             if (attempts.Count < 2) continue;
 
+            var quizTitle = attempts.FirstOrDefault()?.Quiz?.Title ?? "[Unknown Quiz]";
+
             var attemptDtos = attempts.Select(attempt =>
             {
                 var totalQuestions = attempt.Quiz?.Questions.Count ?? 0;
-                var correctAnswers = CalculateCorrectAnswers(attempt.UserAnswers);
-                var percentage = totalQuestions > 0
-                    ? (int)Math.Round((double)correctAnswers / totalQuestions * 100)
-                    : 0;
-                var duration = attempt.FinishedAt.HasValue
-                    ? (int)(attempt.FinishedAt.Value - attempt.StartedAt).TotalMinutes
-                    : 0;
+                var correctAnswers = attempt.UserAnswers?.Count(ua => ua.IsCorrect) ?? 0;
+                var percentage = totalQuestions > 0 ? (int)Math.Round((double)correctAnswers / totalQuestions * 100) : 0;
+                var duration = attempt.FinishedAt.HasValue ? (int)(attempt.FinishedAt.Value - attempt.StartedAt).TotalMinutes : 0;
 
                 return new QuizAttemptProgressDto(
                     AttemptId: attempt.Id,
@@ -256,13 +189,11 @@ public class QuizAttemptService : IQuizAttemptService
             var percentages = attemptDtos.Select(a => a.Percentage).ToList();
             var bestScore = percentages.Max();
             var averageScore = (int)Math.Round(percentages.Average());
-            var improvement = attemptDtos.Count >= 2
-                ? attemptDtos.Last().Percentage - attemptDtos.First().Percentage
-                : 0;
+            var improvement = attemptDtos.Count >= 2 ? attemptDtos.Last().Percentage - attemptDtos.First().Percentage : 0;
 
             progressList.Add(new QuizProgressDto(
-                QuizId: quizGroup.Key?.Id ?? 0,
-                QuizTitle: quizGroup.Key?.Title ?? "[Unknown Quiz]",
+                QuizId: quizGroup.Key,
+                QuizTitle: quizTitle,
                 Attempts: attemptDtos,
                 BestScore: bestScore,
                 AverageScore: averageScore,
@@ -275,206 +206,154 @@ public class QuizAttemptService : IQuizAttemptService
 
     public async Task<IEnumerable<QuizAttemptResponse>> GetAllQuizAttemptsAsync()
     {
-        var attempts = await _unitOfWork.QuizAttempts.Query()
-            .Include(a => a.Quiz)
-                .ThenInclude(q => q.Questions)
-            .Include(a => a.User)
-            .Include(a => a.UserAnswers)
-                .ThenInclude(ua => ua.Question)
-            .Include(a => a.UserAnswers)
-                .ThenInclude(ua => ua.AnswerDetails)
-                    .ThenInclude(ad => ad.AnswerOption)
+        var attempts = await unitOfWork.QuizAttempts.Query()
+            .AsNoTracking()
             .OrderByDescending(a => a.StartedAt)
             .ToListAsync();
 
-        var responses = new List<QuizAttemptResponse>();
+        return await BuildAttemptResponsesAsync(attempts);
+    }
+
+    public async Task<IEnumerable<QuizAttemptResponse>> GetQuizAttemptsByQuizAsync(int quizId)
+    {
+        var attempts = await unitOfWork.QuizAttempts.Query()
+            .AsNoTracking()
+            .Where(a => a.QuizId == quizId)
+            .OrderByDescending(a => a.StartedAt)
+            .ToListAsync();
+
+        return await BuildAttemptResponsesAsync(attempts);
+    }
+
+    // --- Private helpers ---
+    private IQueryable<QuizAttempt> GetAttemptQuery(bool asNoTracking = true)
+    {
+        var query = unitOfWork.QuizAttempts.Query()
+            .Include(a => a.Quiz)
+                .ThenInclude(q => q.Questions)
+                    .ThenInclude(q => q.AnswerOptions)
+            .Include(a => a.UserAnswers)
+                .ThenInclude(ua => ua.AnswerDetails)
+                    .ThenInclude(ad => ad.AnswerOption)
+            .Include(a => a.UserAnswers)
+                .ThenInclude(ua => ua.Question);
+
+        return asNoTracking ? query.AsNoTracking() : query;
+    }
+
+    private IQueryable<QuizAttempt> GetAttemptSummaryQuery(bool asNoTracking = true)
+    {
+        var query = unitOfWork.QuizAttempts.Query()
+            .Include(a => a.Quiz)
+                .ThenInclude(q => q.Questions)
+            .Include(a => a.UserAnswers);
+
+        return asNoTracking ? query.AsNoTracking() : query;
+    }
+
+    private bool CheckAnswerCorrectness(Question question, UserAnswerRequest answerRequest)
+    {
+        var selectedOptionIds = answerRequest.SelectedAnswerOptionIds?.ToList() ?? [];
+
+        return question.Type switch
+        {
+            QuestionType.FillInBlank => string.Equals(
+                question.AnswerOptions.FirstOrDefault(o => o.IsCorrect)?.Text?.Trim(),
+                answerRequest.TextAnswer?.Trim(),
+                StringComparison.OrdinalIgnoreCase
+            ),
+            QuestionType.SingleChoice or QuestionType.TrueFalse =>
+                question.AnswerOptions.FirstOrDefault(o => o.Id == selectedOptionIds.FirstOrDefault())?.IsCorrect ?? false,
+            QuestionType.MultipleChoice =>
+                IsMultipleChoiceCorrect(question, selectedOptionIds),
+            _ => false
+        };
+    }
+
+    private static bool IsMultipleChoiceCorrect(Question question, List<int> selectedOptionIds)
+    {
+        var selectedUnique = selectedOptionIds.ToHashSet();
+        if (selectedUnique.Count != selectedOptionIds.Count)
+        {
+            return false;
+        }
+
+        var correctIds = question.AnswerOptions
+            .Where(o => o.IsCorrect)
+            .Select(o => o.Id)
+            .ToHashSet();
+
+        return correctIds.SetEquals(selectedUnique);
+    }
+
+    private async Task<List<QuizAttemptResponse>> BuildAttemptResponsesAsync(List<QuizAttempt> attempts)
+    {
+        if (attempts.Count == 0)
+        {
+            return [];
+        }
+
+        var attemptIds = attempts.Select(a => a.Id).ToList();
+        var quizIds = attempts.Select(a => a.QuizId).Distinct().ToList();
+
+        var questionCounts = await unitOfWork.Questions.Query()
+            .AsNoTracking()
+            .Where(q => quizIds.Contains(q.QuizId))
+            .GroupBy(q => q.QuizId)
+            .Select(g => new { QuizId = g.Key, Count = g.Count() })
+            .ToDictionaryAsync(x => x.QuizId, x => x.Count);
+
+        var userAnswers = await unitOfWork.UserAnswers.Query()
+            .AsNoTracking()
+            .Where(ua => attemptIds.Contains(ua.QuizAttemptId))
+            .Include(ua => ua.Question)
+                .ThenInclude(q => q.AnswerOptions)
+            .Include(ua => ua.AnswerDetails)
+                .ThenInclude(ad => ad.AnswerOption)
+            .ToListAsync();
+
+        var answersByAttemptId = userAnswers
+            .GroupBy(ua => ua.QuizAttemptId)
+            .ToDictionary(g => g.Key, g => g.ToList());
+
+        var responses = new List<QuizAttemptResponse>(attempts.Count);
 
         foreach (var attempt in attempts)
         {
-            var totalQuestions = attempt.Quiz?.Questions?.Count ?? 0;
-            var correctAnswers = attempt.UserAnswers?.Count(ua => ua.IsCorrect) ?? 0;
+            var totalQuestions = questionCounts.TryGetValue(attempt.QuizId, out var count) ? count : 0;
+            var answers = answersByAttemptId.TryGetValue(attempt.Id, out var uaList) ? uaList : [];
+            attempt.UserAnswers = answers;
 
-            var response = new QuizAttemptResponse(
-                Id: attempt.Id,
-                QuizId: attempt.QuizId,
-                UserId: attempt.UserId,
-                Score: attempt.Score,
-                TotalQuestions: totalQuestions,
-                CorrectAnswers: correctAnswers,
-                StartedAt: attempt.StartedAt,
-                FinishedAt: attempt.FinishedAt,
-                Answers: attempt.UserAnswers?.Select(ua => new UserAnswerResponse(
-                    QuestionId: ua.QuestionId,
-                    QuestionText: ua.Question?.Text ?? "[Unknown question]",
-                    QuestionType: ua.Question?.Type.ToString() ?? "Unknown",
-                    IsCorrect: ua.IsCorrect,
-                    Points: ua.IsCorrect ? (ua.Question?.Points ?? 1) : 0,
-                    SelectedOptionIds: ua.AnswerDetails?.Select(ad => ad.AnswerOptionId).ToList() ?? new List<int>(),
-                    TextAnswer: ua.TextAnswer,
-                    Details: GetAnswerDetails(ua)
-                )).ToList() ?? new List<UserAnswerResponse>()
-            );
-
+            var response = mapper.Map<QuizAttemptResponse>(attempt);
+            response.TotalQuestions = totalQuestions;
             responses.Add(response);
         }
 
         return responses;
     }
 
-    public async Task<IEnumerable<QuizAttemptResponse>> GetQuizAttemptsByQuizAsync(int quizId)
-    {
-        var attempts = await _unitOfWork.QuizAttempts.Query()
-            .Include(a => a.Quiz)
-                .ThenInclude(q => q.Questions)
-            .Include(a => a.User)
-            .Include(a => a.UserAnswers)
-                .ThenInclude(ua => ua.Question)
-            .Include(a => a.UserAnswers)
-                .ThenInclude(ua => ua.AnswerDetails)
-                    .ThenInclude(ad => ad.AnswerOption)
-            .Where(a => a.QuizId == quizId)
-            .OrderByDescending(a => a.StartedAt)
-            .ToListAsync();
-
-        return _mapper.Map<IEnumerable<QuizAttemptResponse>>(attempts);
-    }
-
-    private int CalculateCorrectAnswers(ICollection<UserAnswer> userAnswers)
-    {
-        if (userAnswers == null || !userAnswers.Any()) return 0;
-        return userAnswers.Count(ua => ua.IsCorrect);
-    }
-
-    private List<UserAnswerDetailResponse> GetAnswerDetails(UserAnswer userAnswer)
-    {
-        var details = new List<UserAnswerDetailResponse>();
-
-        if (userAnswer.Question == null)
-        {
-            details.Add(new UserAnswerDetailResponse("Question data not available", false));
-            return details;
-        }
-
-        if (userAnswer.Question.Type == QuestionType.FillInBlank)
-        {
-            details.Add(new UserAnswerDetailResponse(
-                Text: $"Your answer: {(string.IsNullOrEmpty(userAnswer.TextAnswer) ? "[No answer]" : userAnswer.TextAnswer)}",
-                IsCorrect: userAnswer.IsCorrect
-            ));
-
-            var correctOption = userAnswer.Question.AnswerOptions.FirstOrDefault(ao => ao.IsCorrect);
-            if (correctOption != null)
-            {
-                details.Add(new UserAnswerDetailResponse(
-                    Text: $"Correct answer: {correctOption.Text}",
-                    IsCorrect: true
-                ));
-            }
-        }
-        else
-        {
-            if (userAnswer.AnswerDetails.Any())
-            {
-                foreach (var answerDetail in userAnswer.AnswerDetails)
-                {
-                    var optionText = answerDetail.AnswerOption?.Text ?? "[Unknown option]";
-                    details.Add(new UserAnswerDetailResponse(
-                        Text: $"Selected: {optionText}",
-                        IsCorrect: answerDetail.AnswerOption?.IsCorrect ?? false
-                    ));
-                }
-            }
-
-            var correctOptions = userAnswer.Question.AnswerOptions
-                .Where(ao => ao.IsCorrect)
-                .ToList();
-
-            var selectedOptionIds = userAnswer.AnswerDetails
-                .Select(ad => ad.AnswerOptionId)
-                .ToList();
-
-            var correctOptionsNotSelected = correctOptions
-                .Where(ao => !selectedOptionIds.Contains(ao.Id))
-                .ToList();
-
-            foreach (var correctOption in correctOptionsNotSelected)
-            {
-                details.Add(new UserAnswerDetailResponse(
-                    Text: $"Correct: {correctOption.Text}",
-                    IsCorrect: true
-                ));
-            }
-        }
-
-        return details;
-    }
-
-    private bool CheckAnswerCorrectness(Question question, UserAnswerRequest answerRequest)
-    {
-        return question.Type switch
-        {
-            QuestionType.FillInBlank => CheckFillInBlankCorrectness(question, answerRequest.TextAnswer),
-            QuestionType.SingleChoice => CheckSingleChoiceCorrectness(question, answerRequest),
-            QuestionType.MultipleChoice => CheckMultipleChoiceCorrectness(question, answerRequest),
-            QuestionType.TrueFalse => CheckSingleChoiceCorrectness(question, answerRequest),
-            _ => false
-        };
-    }
-
-    private bool CheckFillInBlankCorrectness(Question question, string userAnswer)
-    {
-        if (string.IsNullOrWhiteSpace(userAnswer)) return false;
-
-        var correctAnswer = question.AnswerOptions.FirstOrDefault(o => o.IsCorrect);
-        return correctAnswer != null &&
-               correctAnswer.Text.Trim().Equals(userAnswer.Trim(), StringComparison.OrdinalIgnoreCase);
-    }
-
-    private bool CheckSingleChoiceCorrectness(Question question, UserAnswerRequest answerRequest)
-    {
-        var selectedIds = answerRequest.SelectedAnswerOptionIds.ToList();
-        if (selectedIds.Count != 1) return false;
-
-        var selectedOption = question.AnswerOptions.FirstOrDefault(o => o.Id == selectedIds[0]);
-        return selectedOption != null && selectedOption.IsCorrect;
-    }
-
-    private bool CheckMultipleChoiceCorrectness(Question question, UserAnswerRequest answerRequest)
-    {
-        var correctOptions = question.AnswerOptions.Where(o => o.IsCorrect).ToList();
-        var selectedOptions = answerRequest.SelectedAnswerOptionIds.ToList();
-
-        if (correctOptions.Count != selectedOptions.Count) return false;
-
-        var allCorrectSelected = correctOptions.All(correct => selectedOptions.Contains(correct.Id));
-        var allSelectedCorrect = selectedOptions.All(selected => correctOptions.Any(correct => correct.Id == selected));
-
-        return allCorrectSelected && allSelectedCorrect;
-    }
-
     private async Task UpdateLeaderboard(int quizId, Guid userId, int score, DateTime achievedAt)
     {
-        var existingEntry = await _unitOfWork.LeaderboardEntries.Query()
-            .FirstOrDefaultAsync(le => le.QuizId == quizId && le.UserId == userId);
+        var entry = await unitOfWork.LeaderboardEntries.Query()
+            .FirstOrDefaultAsync(e => e.QuizId == quizId && e.UserId == userId);
 
-        if (existingEntry != null)
+        if (entry != null)
         {
-            if (score > existingEntry.Score)
+            if (score > entry.Score)
             {
-                existingEntry.Score = score;
-                existingEntry.AchievedAt = achievedAt;
+                entry.Score = score;
+                entry.AchievedAt = achievedAt;
             }
         }
         else
         {
-            var newEntry = new LeaderboardEntry
+            await unitOfWork.LeaderboardEntries.AddAsync(new LeaderboardEntry
             {
                 QuizId = quizId,
                 UserId = userId,
                 Score = score,
                 AchievedAt = achievedAt
-            };
-            await _unitOfWork.LeaderboardEntries.AddAsync(newEntry);
+            });
         }
     }
 }

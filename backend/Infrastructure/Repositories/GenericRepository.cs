@@ -3,6 +3,8 @@ using KvizHub.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
+namespace KvizHub.Infrastructure.Repositories;
+
 public class GenericRepository<TEntity> : IGenericRepository<TEntity> where TEntity : class
 {
     protected readonly ApplicationDbContext _context;

@@ -9,7 +9,14 @@ public static class JwtServiceExtensions
     public static IServiceCollection AddJwtAuthentication(this IServiceCollection services, IConfiguration configuration)
     {
         var jwtSettings = configuration.GetSection("Jwt");
-        var key = Encoding.UTF8.GetBytes(jwtSettings["Key"]!);
+        var jwtKey = jwtSettings["Key"];
+
+        if (string.IsNullOrWhiteSpace(jwtKey))
+        {
+            throw new InvalidOperationException("JWT key is not configured. Set Jwt__Key environment variable.");
+        }
+
+        var key = Encoding.UTF8.GetBytes(jwtKey);
 
         services.AddAuthentication(options =>
             {
@@ -34,12 +41,20 @@ public static class JwtServiceExtensions
                 {
                     OnAuthenticationFailed = context =>
                     {
-                        Console.WriteLine($"Authentication failed: {context.Exception.Message}");
+                        var logger = context.HttpContext.RequestServices
+                            .GetRequiredService<ILoggerFactory>()
+                            .CreateLogger("JwtAuthentication");
+
+                        logger.LogWarning(context.Exception, "JWT authentication failed");
                         return Task.CompletedTask;
                     },
                     OnTokenValidated = context =>
                     {
-                        Console.WriteLine("Token validated successfully");
+                        var logger = context.HttpContext.RequestServices
+                            .GetRequiredService<ILoggerFactory>()
+                            .CreateLogger("JwtAuthentication");
+
+                        logger.LogDebug("JWT token validated successfully");
                         return Task.CompletedTask;
                     }
                 };

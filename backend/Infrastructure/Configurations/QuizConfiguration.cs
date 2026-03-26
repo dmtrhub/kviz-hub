@@ -10,6 +10,9 @@ public class QuizConfiguration : IEntityTypeConfiguration<Quiz>
     {
         builder.HasKey(q => q.Id);
 
+              builder.HasIndex(q => q.Title)
+                     .HasDatabaseName("IX_Quizzes_Title");
+
         builder.Property(q => q.Title)
                .IsRequired()
                .HasMaxLength(100);

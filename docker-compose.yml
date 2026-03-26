@@ -2,14 +2,19 @@ services:
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2022-latest
     environment:
-      SA_PASSWORD: "YourStrong@Password123"
+      SA_PASSWORD: "${SA_PASSWORD}"
       ACCEPT_EULA: "Y"
       MSSQL_PID: "Express"
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"$$SA_PASSWORD\" -Q \"SELECT 1\" -C || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 20s
     ports:
       - "1433:1433"
     volumes:
       - sqlserver_data:/var/opt/mssql
-      - ./create-database.sql:/docker-entrypoint-initdb.d/create-database.sql
     networks:
       - app-network
 
@@ -20,35 +25,37 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:80
-      - ConnectionStrings__KvizHub=Server=sqlserver;Database=KvizHubDb;User=sa;Password=YourStrong@Password123;TrustServerCertificate=true;
+      - ConnectionStrings__KvizHub=Server=sqlserver;Database=${DATABASE_NAME};User=sa;Password=${SA_PASSWORD};TrustServerCertificate=true;
+      - Jwt__Issuer=${JWT_ISSUER}
+      - Jwt__Audience=${JWT_AUDIENCE}
+      - Jwt__Key=${JWT_KEY}
     depends_on:
-      - sqlserver
+      sqlserver:
+        condition: service_healthy
     ports:
       - "7033:80"
     networks:
       - app-network
-    command: >
-      sh -c "
-        echo '⏳ Waiting for SQL Server...'
-        sleep 15
-        echo '🚀 Running database migrations...'
-        dotnet ef database update
-        echo '✅ Starting application...'
-        dotnet KvizHub.Api.dll
-      "
 
   frontend:
     build:
       context: ./frontend/kviz-hub-ui
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
     ports:
-      - "5173:80"
+      - "5173:5173"
     depends_on:
       - backend
     networks:
       - app-network
     environment:
-      - VITE_API_URL=http://backend:80
+      - VITE_API_BASE_URL=${VITE_API_BASE_URL:-http://localhost:7033/api}
+      - VITE_AVATAR_URL=${VITE_AVATAR_URL:-http://localhost:7033}
+    volumes:
+      - ./frontend/kviz-hub-ui/src:/app/src
+      - ./frontend/kviz-hub-ui/index.html:/app/index.html
+      - ./frontend/kviz-hub-ui/vite.config.ts:/app/vite.config.ts
+      - ./frontend/kviz-hub-ui/tailwind.config.js:/app/tailwind.config.js
+      - ./frontend/kviz-hub-ui/postcss.config.js:/app/postcss.config.js
 
 networks:
   app-network:

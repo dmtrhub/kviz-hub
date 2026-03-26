@@ -5,17 +5,19 @@ using KvizHub.Domain.Entities.Quizzes;
 
 namespace KvizHub.Application.Mapping;
 
-public class QuestionAnswerMappingProfile : Profile
+public sealed class QuestionAnswerMappingProfile : Profile
 {
     public QuestionAnswerMappingProfile()
     {
-        // Question
         CreateMap<Question, QuestionResponse>()
-            .ForMember(dest => dest.Type, opt => opt.MapFrom(src => src.Type));
-        CreateMap<CreateQuestionRequest, Question>();
-        CreateMap<UpdateQuestionRequest, Question>();
+            .ForMember(dest => dest.Type, opt => opt.MapFrom(src => src.Type.ToString()));
 
-        // AnswerOption
+        CreateMap<CreateQuestionRequest, Question>();
+
+        CreateMap<UpdateQuestionRequest, Question>()
+            .ForMember(dest => dest.Id, opt => opt.Ignore())
+            .ForMember(dest => dest.Quiz, opt => opt.Ignore());
+
         CreateMap<AnswerOption, AnswerOptionResponse>().ReverseMap();
         CreateMap<CreateAnswerOptionRequest, AnswerOption>();
         CreateMap<UpdateAnswerOptionRequest, AnswerOption>();

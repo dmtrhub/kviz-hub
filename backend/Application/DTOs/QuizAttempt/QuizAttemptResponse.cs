@@ -2,14 +2,15 @@
 
 namespace KvizHub.Application.DTOs.QuizAttempt;
 
-public record QuizAttemptResponse(
-    int Id = 0,
-    int QuizId = 0,
-    Guid UserId = default,
-    int Score = 0,
-    int TotalQuestions = 0,
-    int CorrectAnswers = 0,
-    DateTime StartedAt = default,
-    DateTime? FinishedAt = null,
-    IEnumerable<UserAnswerResponse> Answers = null!
-);
+public class QuizAttemptResponse
+{
+    public int Id { get; set; }
+    public int QuizId { get; set; }
+    public Guid UserId { get; set; }
+    public int Score { get; set; }
+    public int TotalQuestions { get; set; }
+    public int CorrectAnswers { get; set; }
+    public DateTime StartedAt { get; set; }
+    public DateTime? FinishedAt { get; set; }
+    public List<UserAnswerResponse> Answers { get; set; } = [];
+}

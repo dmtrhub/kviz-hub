@@ -10,22 +10,15 @@ namespace KvizHub.Api.Controllers;
 [ApiController]
 [Route("api")]
 [Authorize]
-public class QuizAttemptsController : ControllerBase
+public class QuizAttemptsController(IQuizAttemptService quizAttemptService) : ControllerBase
 {
-    private readonly IQuizAttemptService _quizAttemptService;
-
-    public QuizAttemptsController(IQuizAttemptService quizAttemptService)
-    {
-        _quizAttemptService = quizAttemptService;
-    }
-
     private Guid GetUserId() => Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
     [HttpPost("quizzes/{quizId}/attempts")]
     public async Task<ActionResult<QuizAttemptResponse>> CreateAttempt(int quizId)
     {
         var userId = GetUserId();
-        var attempt = await _quizAttemptService.CreateAttemptAsync(quizId, userId);
+        var attempt = await quizAttemptService.CreateAttemptAsync(quizId, userId);
         return Ok(attempt);
     }
 
@@ -33,7 +26,7 @@ public class QuizAttemptsController : ControllerBase
     public async Task<ActionResult<QuizAttemptResponse>> FinishAttempt(int attemptId, FinishQuizAttemptRequest request)
     {
         var userId = GetUserId();
-        var result = await _quizAttemptService.FinishAttemptAsync(attemptId, request, userId);
+        var result = await quizAttemptService.FinishAttemptAsync(attemptId, request, userId);
         if (result == null) return NotFound();
         return Ok(result);
     }
@@ -42,7 +35,7 @@ public class QuizAttemptsController : ControllerBase
     public async Task<ActionResult<IEnumerable<QuizAttemptResponse>>> GetUserAttempts()
     {
         var userId = GetUserId();
-        var attempts = await _quizAttemptService.GetUserAttemptsAsync(userId);
+        var attempts = await quizAttemptService.GetUserAttemptsAsync(userId);
         return Ok(attempts);
     }
 
@@ -50,7 +43,7 @@ public class QuizAttemptsController : ControllerBase
     public async Task<ActionResult<QuizAttemptResponse>> GetAttemptById(int attemptId)
     {
         var userId = GetUserId();
-        var attempt = await _quizAttemptService.GetAttemptByIdAsync(attemptId, userId);
+        var attempt = await quizAttemptService.GetAttemptByIdAsync(attemptId, userId);
         if (attempt == null) return NotFound();
         return Ok(attempt);
     }
@@ -58,26 +51,15 @@ public class QuizAttemptsController : ControllerBase
     [HttpGet("quizzes/{quizId}/active-attempt")]
     public async Task<ActionResult<QuizAttemptResponse>> GetActiveAttempt(int quizId)
     {
-        try
+        var userId = GetUserId();
+        var activeAttempt = await quizAttemptService.GetActiveAttemptAsync(quizId, userId);
+
+        if (activeAttempt == null)
         {
-            var userId = GetUserId();
-
-            var activeAttempt = await _quizAttemptService.GetActiveAttemptAsync(quizId, userId);
-
-            if (activeAttempt == null)
-            {
-                Console.WriteLine("No active attempt found");
-                return NotFound();
-            }
-
-            Console.WriteLine("Active attempt found");
-            return Ok(activeAttempt);
+            return NotFound();
         }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error in GetActiveAttempt: {ex.Message}");
-            return StatusCode(500, "Internal server error");
-        }
+
+        return Ok(activeAttempt);
     }
 
     [HttpGet("my-results")]
@@ -85,7 +67,7 @@ public class QuizAttemptsController : ControllerBase
     public async Task<ActionResult<List<MyQuizResultDto>>> GetMyResults()
     {
         var userId = GetUserId();
-        var results = await _quizAttemptService.GetUserResultsAsync(userId);
+        var results = await quizAttemptService.GetUserResultsAsync(userId);
         return Ok(results);
     }
 
@@ -94,7 +76,7 @@ public class QuizAttemptsController : ControllerBase
     public async Task<ActionResult<List<QuizProgressDto>>> GetMyProgress()
     {
         var userId = GetUserId();
-        var progress = await _quizAttemptService.GetUserProgressAsync(userId);
+        var progress = await quizAttemptService.GetUserProgressAsync(userId);
         return Ok(progress);
     }
 
@@ -102,7 +84,7 @@ public class QuizAttemptsController : ControllerBase
     [Authorize(Roles = "Admin")]
     public async Task<ActionResult<IEnumerable<QuizAttemptResponse>>> GetAllQuizAttempts()
     {
-        var attempts = await _quizAttemptService.GetAllQuizAttemptsAsync();
+        var attempts = await quizAttemptService.GetAllQuizAttemptsAsync();
         return Ok(attempts);
     }
 
@@ -110,7 +92,7 @@ public class QuizAttemptsController : ControllerBase
     [Authorize(Roles = "Admin")]
     public async Task<ActionResult<IEnumerable<QuizAttemptResponse>>> GetQuizAttemptsByQuiz(int quizId)
     {
-        var attempts = await _quizAttemptService.GetQuizAttemptsByQuizAsync(quizId);
+        var attempts = await quizAttemptService.GetQuizAttemptsByQuizAsync(quizId);
         return Ok(attempts);
     }
 }

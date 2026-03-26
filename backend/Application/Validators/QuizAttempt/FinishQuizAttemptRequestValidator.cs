@@ -8,9 +8,6 @@ public class FinishQuizAttemptRequestValidator : AbstractValidator<FinishQuizAtt
 {
     public FinishQuizAttemptRequestValidator()
     {
-        RuleFor(x => x.Answers)
-            .NotEmpty().WithMessage("At least one answer must be provided.");
-
         RuleForEach(x => x.Answers).SetValidator(new UserAnswerRequestValidator());
     }
 }

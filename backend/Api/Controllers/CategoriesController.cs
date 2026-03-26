@@ -8,26 +8,19 @@ namespace KvizHub.Api.Controllers;
 [ApiController]
 [Route("api/categories")]
 [Authorize(Roles = "Admin")]
-public class CategoriesController : ControllerBase
+public class CategoriesController(ICategoryService categoryService) : ControllerBase
 {
-    private readonly ICategoryService _categoryService;
-
-    public CategoriesController(ICategoryService categoryService)
-    {
-        _categoryService = categoryService;
-    }
-
     [HttpGet]
     public async Task<ActionResult<IEnumerable<CategoryResponse>>> GetAll()
     {
-        var categories = await _categoryService.GetAllAsync();
+        var categories = await categoryService.GetAllAsync();
         return Ok(categories);
     }
 
     [HttpGet("{id}")]
     public async Task<ActionResult<CategoryResponse>> GetById(int id)
     {
-        var category = await _categoryService.GetByIdAsync(id);
+        var category = await categoryService.GetByIdAsync(id);
         if (category == null) return NotFound();
         return Ok(category);
     }
@@ -35,14 +28,14 @@ public class CategoriesController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<CategoryResponse>> Create(CategoryRequest request)
     {
-        var category = await _categoryService.CreateAsync(request);
+        var category = await categoryService.CreateAsync(request);
         return CreatedAtAction(nameof(GetById), new { id = category.Id }, category);
     }
 
     [HttpPut("{id}")]
     public async Task<ActionResult<CategoryResponse>> Update(int id, CategoryRequest request)
     {
-        var category = await _categoryService.UpdateAsync(id, request);
+        var category = await categoryService.UpdateAsync(id, request);
         if (category == null) return NotFound();
         return Ok(category);
     }
@@ -50,7 +43,7 @@ public class CategoriesController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {
-        var success = await _categoryService.DeleteAsync(id);
+        var success = await categoryService.DeleteAsync(id);
         if (!success) return NotFound();
         return NoContent();
     }

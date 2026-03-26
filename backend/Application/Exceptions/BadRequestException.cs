@@ -1,8 +1,5 @@
 ﻿namespace KvizHub.Application.Exceptions;
 
-public class BadRequestException : Exception
+public class BadRequestException(string message) : Exception(message)
 {
-    public BadRequestException(string message) : base(message)
-    {
-    }
 }

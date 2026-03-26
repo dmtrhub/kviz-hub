@@ -7,86 +7,80 @@ using Microsoft.EntityFrameworkCore;
 
 namespace KvizHub.Application.Services;
 
-public class QuizService : IQuizService
+public sealed class QuizService(IUnitOfWork unitOfWork, IMapper mapper) : IQuizService
 {
-    private readonly IUnitOfWork _unitOfWork;
-    private readonly IMapper _mapper;
-
-    public QuizService(IUnitOfWork unitOfWork, IMapper mapper)
+    public async Task<PaginatedQuizResult> GetQuizzesAsync(QuizFilterRequest? filter = null)
     {
-        _unitOfWork = unitOfWork;
-        _mapper = mapper;
-    }
+        filter ??= new QuizFilterRequest();
 
-    public async Task<IEnumerable<QuizResponse>> GetQuizzesAsync(QuizFilterRequest filter)
-    {
-        var query = _unitOfWork.Quizzes.Query()
-            .Include(q => q.Questions)
-            .Include(q => q.QuizCategories)
-                .ThenInclude(qc => qc.Category)
-            .Include(q => q.Questions)
-            .AsQueryable();
+        var countQuery = ApplyFilters(unitOfWork.Quizzes.Query().AsNoTracking(), filter);
+        var totalCount = await countQuery.CountAsync();
 
-        if (!string.IsNullOrWhiteSpace(filter.Keyword))
-            query = query.Where(q => q.Title.Contains(filter.Keyword) || q.Description.Contains(filter.Keyword));
+        var query = ApplyFilters(GetQuizQuery(asNoTracking: true), filter);
 
-        if (filter.CategoryId.HasValue)
-            query = query.Where(q => q.QuizCategories.Any(qc => qc.CategoryId == filter.CategoryId.Value));
+        var usePagination = filter.Page.HasValue && filter.PageSize.HasValue
+            && filter.Page.Value > 0 && filter.PageSize.Value > 0;
 
-        if (filter.Difficulty.HasValue)
-            query = query.Where(q => q.Difficulty == filter.Difficulty.Value);
+        var page = usePagination ? Math.Max(1, filter.Page!.Value) : 1;
+        var pageSize = usePagination ? Math.Clamp(filter.PageSize!.Value, 1, 100) : Math.Max(1, totalCount);
+
+        query = query.OrderBy(q => q.Id);
+
+        if (usePagination)
+        {
+            query = query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize);
+        }
 
         var quizzes = await query.ToListAsync();
-        return _mapper.Map<IEnumerable<QuizResponse>>(quizzes);
+        var items = mapper.Map<List<QuizResponse>>(quizzes);
+
+        return new PaginatedQuizResult(
+            Items: items,
+            TotalCount: totalCount,
+            Page: page,
+            PageSize: pageSize
+        );
     }
 
     public async Task<QuizResponse?> GetQuizByIdAsync(int id)
     {
-        var quiz = await _unitOfWork.Quizzes.Query()
-            .Include(q => q.Questions)
-                .ThenInclude(q => q.AnswerOptions)
-            .Include(q => q.QuizCategories)
-                .ThenInclude(qc => qc.Category)
-            .Include(q => q.Questions)
+        var quiz = await GetQuizQuery(asNoTracking: true)
             .FirstOrDefaultAsync(q => q.Id == id);
 
-        if (quiz == null)
-            return null;
-
-        return _mapper.Map<QuizResponse>(quiz);
+        return quiz == null ? null : mapper.Map<QuizResponse>(quiz);
     }
 
     public async Task<QuizResponse> CreateQuizAsync(CreateQuizRequest request)
     {
-        var quiz = _mapper.Map<Quiz>(request);
+        var quiz = mapper.Map<Quiz>(request);
 
-        if (request.CategoryIds != null && request.CategoryIds.Any())
+        if (request.CategoryIds?.Any() == true)
         {
-            quiz.QuizCategories = request.CategoryIds
+            var distinctCategoryIds = request.CategoryIds.Distinct();
+
+            quiz.QuizCategories = distinctCategoryIds
                 .Select(cid => new QuizCategory { CategoryId = cid, Quiz = quiz })
                 .ToList();
         }
 
-        await _unitOfWork.Quizzes.AddAsync(quiz);
-        await _unitOfWork.SaveChangesAsync();
+        await unitOfWork.Quizzes.AddAsync(quiz);
+        await unitOfWork.SaveChangesAsync();
 
-        quiz = await _unitOfWork.Quizzes.Query()
-            .Include(q => q.QuizCategories)
-                .ThenInclude(qc => qc.Category)
-            .Include(q => q.Questions)
+        var createdQuiz = await GetQuizQuery(asNoTracking: true)
             .FirstAsync(q => q.Id == quiz.Id);
 
-        return _mapper.Map<QuizResponse>(quiz);
+        return mapper.Map<QuizResponse>(createdQuiz);
     }
 
     public async Task<QuizResponse?> UpdateQuizAsync(int id, UpdateQuizRequest request)
     {
-        var quiz = await _unitOfWork.Quizzes.Query()
+        var quiz = await unitOfWork.Quizzes.Query()
             .Include(q => q.QuizCategories)
             .FirstOrDefaultAsync(q => q.Id == id);
 
-        if (quiz == null)
-            return null;
+        if (quiz == null) return null;
 
         quiz.Title = request.Title;
         quiz.Description = request.Description;
@@ -95,46 +89,77 @@ public class QuizService : IQuizService
 
         if (request.CategoryIds != null)
         {
-            var currentCategoryIds = quiz.QuizCategories.Select(qc => qc.CategoryId).ToList();
-            var newCategoryIds = request.CategoryIds.ToList();
+            var newCategoryIds = request.CategoryIds.Distinct().ToHashSet();
+            var currentCategoryIds = quiz.QuizCategories.Select(qc => qc.CategoryId).ToHashSet();
 
-            if (!currentCategoryIds.SequenceEqual(newCategoryIds))
+            var categoriesToRemove = quiz.QuizCategories
+                .Where(qc => !newCategoryIds.Contains(qc.CategoryId))
+                .ToList();
+
+            if (categoriesToRemove.Count > 0)
             {
-                foreach (var existingCategory in quiz.QuizCategories.ToList())
+                unitOfWork.QuizCategories.RemoveRange(categoriesToRemove);
+            }
+
+            var categoryIdsToAdd = newCategoryIds.Except(currentCategoryIds);
+            foreach (var categoryId in categoryIdsToAdd)
+            {
+                quiz.QuizCategories.Add(new QuizCategory
                 {
-                    _unitOfWork.QuizCategories.Remove(existingCategory);
-                }
-                foreach (var categoryId in newCategoryIds)
-                {
-                    quiz.QuizCategories.Add(new QuizCategory
-                    {
-                        QuizId = quiz.Id,
-                        CategoryId = categoryId
-                    });
-                }
+                    QuizId = quiz.Id,
+                    CategoryId = categoryId
+                });
             }
         }
 
-        await _unitOfWork.SaveChangesAsync();
+        await unitOfWork.SaveChangesAsync();
 
-        quiz = await _unitOfWork.Quizzes.Query()
-            .Include(q => q.QuizCategories)
-                .ThenInclude(qc => qc.Category)
-            .Include(q => q.Questions)
+        var updatedQuiz = await GetQuizQuery(asNoTracking: true)
             .FirstAsync(q => q.Id == quiz.Id);
 
-        return _mapper.Map<QuizResponse>(quiz);
+        return mapper.Map<QuizResponse>(updatedQuiz);
     }
 
     public async Task<bool> DeleteQuizAsync(int id)
     {
-        var quiz = await _unitOfWork.Quizzes.GetByIdAsync(id);
-        if (quiz == null)
-            return false;
+        var quiz = await unitOfWork.Quizzes.GetByIdAsync(id);
+        if (quiz == null) return false;
 
-        _unitOfWork.Quizzes.Remove(quiz);
-        await _unitOfWork.SaveChangesAsync();
-
+        unitOfWork.Quizzes.Remove(quiz);
+        await unitOfWork.SaveChangesAsync();
         return true;
+    }
+
+    // --- Private helpers ---
+    private IQueryable<Quiz> GetQuizQuery(bool asNoTracking)
+    {
+        var query = unitOfWork.Quizzes.Query()
+            .Include(q => q.Questions)
+                .ThenInclude(q => q.AnswerOptions)
+            .Include(q => q.QuizCategories)
+                .ThenInclude(qc => qc.Category);
+
+        return asNoTracking ? query.AsNoTracking() : query;
+    }
+
+    private static IQueryable<Quiz> ApplyFilters(IQueryable<Quiz> query, QuizFilterRequest filter)
+    {
+        if (!string.IsNullOrWhiteSpace(filter.Keyword))
+        {
+            var keyword = filter.Keyword.Trim();
+            query = query.Where(q => q.Title.Contains(keyword) || q.Description.Contains(keyword));
+        }
+
+        if (filter.CategoryId.HasValue)
+        {
+            query = query.Where(q => q.QuizCategories.Any(qc => qc.CategoryId == filter.CategoryId.Value));
+        }
+
+        if (filter.Difficulty.HasValue)
+        {
+            query = query.Where(q => q.Difficulty == filter.Difficulty.Value);
+        }
+
+        return query;
     }
 }

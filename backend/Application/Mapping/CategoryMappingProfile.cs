@@ -4,7 +4,7 @@ using KvizHub.Domain.Entities.Quizzes;
 
 namespace KvizHub.Application.Mapping;
 
-public class CategoryMappingProfile : Profile
+public sealed class CategoryMappingProfile : Profile
 {
     public CategoryMappingProfile()
     {

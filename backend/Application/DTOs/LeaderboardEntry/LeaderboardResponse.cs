@@ -2,6 +2,6 @@
 
 public record LeaderboardResponse
 {
-    public List<LeaderboardEntryResponse> Entries { get; set; } = new();
+    public List<LeaderboardEntryResponse> Entries { get; set; } = [];
     public int TotalCount { get; set; }
 }

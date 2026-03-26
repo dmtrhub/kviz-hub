@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 using KvizHub.Application.Exceptions;
-using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 using System.Net;
 using System.Text.Json;
 
@@ -9,10 +9,12 @@ namespace KvizHub.Api.Middleware;
 public class ErrorHandlerMiddleware
 {
     private readonly RequestDelegate _next;
+    private readonly ILogger<ErrorHandlerMiddleware> _logger;
 
-    public ErrorHandlerMiddleware(RequestDelegate next)
+    public ErrorHandlerMiddleware(RequestDelegate next, ILogger<ErrorHandlerMiddleware> logger)
     {
         _next = next;
+        _logger = logger;
     }
 
     public async Task Invoke(HttpContext context)
@@ -23,11 +25,11 @@ public class ErrorHandlerMiddleware
         }
         catch (Exception ex)
         {
-            await HandleExceptionAsync(context, ex);
+            await HandleExceptionAsync(context, ex, _logger);
         }
     }
 
-    private static Task HandleExceptionAsync(HttpContext context, Exception exception)
+    private static Task HandleExceptionAsync(HttpContext context, Exception exception, ILogger logger)
     {
         context.Response.ContentType = "application/json";
 
@@ -81,11 +83,17 @@ public class ErrorHandlerMiddleware
                 statusCode = (int)HttpStatusCode.InternalServerError;
                 responseObj = new
                 {
-                    message = "An unexpected error occurred.",
-                    detail = exception.Message
+                    message = "An unexpected error occurred."
                 };
                 break;
         }
+
+        logger.LogError(
+            exception,
+            "Unhandled exception for {Method} {Path}. Returning status {StatusCode}",
+            context.Request.Method,
+            context.Request.Path,
+            statusCode);
 
         context.Response.StatusCode = statusCode;
         var result = JsonSerializer.Serialize(responseObj);

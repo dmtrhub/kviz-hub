@@ -1,117 +1,133 @@
 ﻿using AutoMapper;
 using KvizHub.Application.DTOs.Question;
+using KvizHub.Application.Exceptions;
 using KvizHub.Application.Interfaces;
 using KvizHub.Application.Interfaces.Repositories;
 using KvizHub.Domain.Entities.Quizzes;
+using KvizHub.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace KvizHub.Application.Services;
 
-public class QuestionService : IQuestionService
+public sealed class QuestionService(IUnitOfWork unitOfWork, IMapper mapper) : IQuestionService
 {
-    private readonly IUnitOfWork _unitOfWork;
-    private readonly IMapper _mapper;
-
-    public QuestionService(IUnitOfWork unitOfWork, IMapper mapper)
-    {
-        _unitOfWork = unitOfWork;
-        _mapper = mapper;
-    }
-
     public async Task<QuestionResponse> CreateQuestionAsync(int quizId, CreateQuestionRequest request)
     {
-        var question = _mapper.Map<Question>(request);
+        var question = mapper.Map<Question>(request);
         question.QuizId = quizId;
 
-        await _unitOfWork.Questions.AddAsync(question);
-        await _unitOfWork.SaveChangesAsync();
+        await unitOfWork.Questions.AddAsync(question);
+        await unitOfWork.SaveChangesAsync();
 
-        return _mapper.Map<QuestionResponse>(question);
+        return mapper.Map<QuestionResponse>(question);
     }
 
     public async Task<bool> DeleteQuestionAsync(int id)
     {
-        var question = await _unitOfWork.Questions.Query()
+        var question = await unitOfWork.Questions.Query()
             .Include(q => q.AnswerOptions)
             .Include(q => q.UserAnswers)
+                .ThenInclude(ua => ua.AnswerDetails)
             .FirstOrDefaultAsync(q => q.Id == id);
 
         if (question == null) return false;
 
-        var answerOptionIds = question.AnswerOptions.Select(ao => ao.Id).ToList();
-        var userAnswerDetailsForOptions = await _unitOfWork.UserAnswerDetails.Query()
-            .Where(uad => answerOptionIds.Contains(uad.AnswerOptionId))
-            .ToListAsync();
-
-        if (userAnswerDetailsForOptions.Any())
-        {
-            _unitOfWork.UserAnswerDetails.RemoveRange(userAnswerDetailsForOptions);
-        }
-
-        var userAnswerIds = question.UserAnswers?.Select(ua => ua.Id).ToList() ?? new List<int>();
-        var userAnswerDetailsForUserAnswers = await _unitOfWork.UserAnswerDetails.Query()
-            .Where(uad => userAnswerIds.Contains(uad.UserAnswerId))
-            .ToListAsync();
-
-        if (userAnswerDetailsForUserAnswers.Any())
-        {
-            _unitOfWork.UserAnswerDetails.RemoveRange(userAnswerDetailsForUserAnswers);
-        }
-
+        // Brišemo sve povezane entitete u jednom prolazu
         if (question.UserAnswers?.Any() == true)
         {
-            _unitOfWork.UserAnswers.RemoveRange(question.UserAnswers);
+            var allUserAnswerDetails = question.UserAnswers
+                .SelectMany(ua => ua.AnswerDetails)
+                .ToList();
+
+            if (allUserAnswerDetails.Any())
+                unitOfWork.UserAnswerDetails.RemoveRange(allUserAnswerDetails);
+
+            unitOfWork.UserAnswers.RemoveRange(question.UserAnswers);
         }
 
-        _unitOfWork.AnswerOptions.RemoveRange(question.AnswerOptions);
+        if (question.AnswerOptions?.Any() == true)
+            unitOfWork.AnswerOptions.RemoveRange(question.AnswerOptions);
 
-        _unitOfWork.Questions.Remove(question);
+        unitOfWork.Questions.Remove(question);
+        await unitOfWork.SaveChangesAsync();
 
-        await _unitOfWork.SaveChangesAsync();
         return true;
     }
 
     public async Task<QuestionResponse?> GetByIdAsync(int id)
     {
-        var question = await _unitOfWork.Questions.Query()
+        var question = await unitOfWork.Questions.Query()
+            .AsNoTracking()
             .Include(q => q.AnswerOptions)
             .FirstOrDefaultAsync(q => q.Id == id);
 
-        return question == null ? null : _mapper.Map<QuestionResponse>(question);
+        return question == null ? null : mapper.Map<QuestionResponse>(question);
     }
 
     public async Task<IEnumerable<QuestionResponse>> GetByQuizIdAsync(int quizId)
     {
-        var questions = await _unitOfWork.Questions.Query()
-            .Include(q => q.AnswerOptions)
-            .Where(q => q.QuizId == quizId)
-            .ToListAsync();
-
-        return _mapper.Map<IEnumerable<QuestionResponse>>(questions);
+        return await GetQuestionsInternal(q => q.QuizId == quizId);
     }
 
     public async Task<IEnumerable<QuestionResponse>> GetQuestionsAsync()
     {
-        var questions = await _unitOfWork.Questions.Query()
-            .Include(q => q.AnswerOptions)
-            .ToListAsync();
-
-        return _mapper.Map<IEnumerable<QuestionResponse>>(questions);
+        return await GetQuestionsInternal();
     }
 
     public async Task<QuestionResponse?> UpdateQuestionAsync(int id, UpdateQuestionRequest request)
     {
-        var question = await _unitOfWork.Questions.Query()
+        var question = await unitOfWork.Questions.Query()
             .Include(q => q.AnswerOptions)
             .FirstOrDefaultAsync(q => q.Id == id);
 
         if (question == null) return null;
 
-        _mapper.Map(request, question);
+        // --- Update osnovnih polja ---
+        question.Text = request.Text;
+        if (!Enum.TryParse<QuestionType>(request.Type, ignoreCase: true, out var parsedType))
+        {
+            throw new BadRequestException("Invalid question type.");
+        }
 
-        _unitOfWork.Questions.Update(question);
-        await _unitOfWork.SaveChangesAsync();
+        question.Type = parsedType;
+        question.Points = request.Points;
 
-        return _mapper.Map<QuestionResponse>(question);
+        // Promena QuizId
+        if (question.QuizId != request.QuizId)
+        {
+            question.QuizId = request.QuizId;
+        }
+
+        // --- Update AnswerOptions ---
+        // Ako request ne sadrži id-eve, tretiramo ih sve kao nove
+        question.AnswerOptions.Clear(); // obriši stare
+        foreach (var opt in request.AnswerOptions)
+        {
+            question.AnswerOptions.Add(new AnswerOption
+            {
+                Text = opt.Text,
+                IsCorrect = opt.IsCorrect
+            });
+        }
+
+        unitOfWork.Questions.Update(question);
+        await unitOfWork.SaveChangesAsync();
+
+        return mapper.Map<QuestionResponse>(question);
+    }
+
+    // --- Private helper for DRY ---
+    private async Task<IEnumerable<QuestionResponse>> GetQuestionsInternal(Expression<Func<Question, bool>>? predicate = null)
+    {
+        IQueryable<Question> query = unitOfWork.Questions.Query()
+            .AsNoTracking()
+            .Include(q => q.AnswerOptions);
+
+        if (predicate != null)
+            query = query.Where(predicate);
+
+        var questions = await query.ToListAsync();
+        return mapper.Map<IEnumerable<QuestionResponse>>(questions);
     }
 }

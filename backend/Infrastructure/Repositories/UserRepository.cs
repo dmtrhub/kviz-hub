@@ -5,30 +5,21 @@ using Microsoft.EntityFrameworkCore;
 
 namespace KvizHub.Infrastructure.Repositories;
 
-public class UserRepository : GenericRepository<User>, IUserRepository
+public class UserRepository(ApplicationDbContext context) : GenericRepository<User>(context), IUserRepository
 {
-    private readonly ApplicationDbContext _context;
-
-    public UserRepository(ApplicationDbContext context) : base(context)
-    {
-        _context = context;
-    }
-
     public async Task<User?> FindByUsernameOrEmailAsync(string identifier)
     {
-        return await _context.Users
+        return await _dbSet
             .FirstOrDefaultAsync(u => u.Username == identifier || u.Email == identifier);
     }
 
     public async Task<bool> ExistsByUsernameAsync(string username)
     {
-        return await _context.Users
-            .AnyAsync(u => u.Username == username);
+        return await _dbSet.AnyAsync(u => u.Username == username);
     }
 
     public async Task<bool> ExistsByEmailAsync(string email)
     {
-        return await _context.Users
-            .AnyAsync(u => u.Email == email);
+        return await _dbSet.AnyAsync(u => u.Email == email);
     }
 }

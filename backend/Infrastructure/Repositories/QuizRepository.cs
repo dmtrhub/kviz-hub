@@ -5,12 +5,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace KvizHub.Infrastructure.Repositories;
 
-public class QuizRepository : GenericRepository<Quiz>, IQuizRepository
+public class QuizRepository(ApplicationDbContext context) : GenericRepository<Quiz>(context), IQuizRepository
 {
-    public QuizRepository(ApplicationDbContext context) : base(context)
-    {
-    }
-
     public async Task<Quiz?> GetQuizWithQuestionsAsync(int id)
     {
         return await _dbSet

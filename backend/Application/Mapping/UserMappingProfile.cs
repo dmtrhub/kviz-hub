@@ -5,7 +5,7 @@ using KvizHub.Domain.Entities.Users;
 
 namespace KvizHub.Application.Mapping;
 
-public class UserMappingProfile : Profile
+public sealed class UserMappingProfile : Profile
 {
     public UserMappingProfile()
     {

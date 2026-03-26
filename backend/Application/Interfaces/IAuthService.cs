@@ -1,4 +1,3 @@
-using KvizHub.Application.DTOs;
 using KvizHub.Application.DTOs.Auth;
 
 namespace KvizHub.Application.Interfaces;

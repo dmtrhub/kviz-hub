@@ -1,12 +1,13 @@
 ﻿namespace KvizHub.Application.DTOs.UserAnswer;
 
-public record UserAnswerResponse(
-    int QuestionId,
-    string QuestionText,
-    string QuestionType,
-    bool IsCorrect,
-    int Points,
-    List<int> SelectedOptionIds,
-    string TextAnswer,
-    IEnumerable<UserAnswerDetailResponse> Details
-);
+public class UserAnswerResponse
+{
+    public int QuestionId { get; set; }
+    public string QuestionText { get; set; } = string.Empty;
+    public string QuestionType { get; set; } = string.Empty;
+    public bool IsCorrect { get; set; }
+    public int Points { get; set; }
+    public List<int> SelectedOptionIds { get; set; } = [];
+    public string TextAnswer { get; set; } = string.Empty;
+    public List<UserAnswerDetailResponse> Details { get; set; } = [];
+}

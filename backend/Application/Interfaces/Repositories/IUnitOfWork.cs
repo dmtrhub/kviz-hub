@@ -1,12 +1,11 @@
 using KvizHub.Domain.Entities.Quizzes;
-using KvizHub.Domain.Entities.Users;
 
 namespace KvizHub.Application.Interfaces.Repositories;
 
 public interface IUnitOfWork : IDisposable
 {
     IQuizRepository Quizzes { get; }
-    ICategoryRepository Categories { get; }
+    IGenericRepository<Category> Categories { get; }
     IUserRepository Users { get; }
     IGenericRepository<Question> Questions { get; }
     IGenericRepository<QuizAttempt> QuizAttempts { get; }
@@ -16,5 +15,8 @@ public interface IUnitOfWork : IDisposable
     IGenericRepository<UserAnswerDetail> UserAnswerDetails { get; }
     IGenericRepository<AnswerOption> AnswerOptions { get; }
 
+    Task BeginTransactionAsync();
+    Task CommitTransactionAsync();
+    Task RollbackTransactionAsync();
     Task<int> SaveChangesAsync();
 }

@@ -8,26 +8,19 @@ namespace KvizHub.Api.Controllers
     [Route("api/questions")]
     [ApiController]
     [Authorize(Roles = "Admin")]
-    public class QuestionsController : ControllerBase
+    public class QuestionsController(IQuestionService questionService) : ControllerBase
     {
-        private readonly IQuestionService _questionService;
-
-        public QuestionsController(IQuestionService questionService)
-        {
-            _questionService = questionService;
-        }
-
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var questions = await _questionService.GetQuestionsAsync();
+            var questions = await questionService.GetQuestionsAsync();
             return Ok(questions);
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var question = await _questionService.GetByIdAsync(id);
+            var question = await questionService.GetByIdAsync(id);
             if (question == null) return NotFound();
             return Ok(question);
         }
@@ -35,7 +28,7 @@ namespace KvizHub.Api.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] UpdateQuestionRequest request)
         {
-            var updated = await _questionService.UpdateQuestionAsync(id, request);
+            var updated = await questionService.UpdateQuestionAsync(id, request);
             if (updated == null) return NotFound();
             return Ok(updated);
         }
@@ -43,7 +36,7 @@ namespace KvizHub.Api.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var deleted = await _questionService.DeleteQuestionAsync(id);
+            var deleted = await questionService.DeleteQuestionAsync(id);
             if (!deleted) return NotFound();
             return NoContent();
         }

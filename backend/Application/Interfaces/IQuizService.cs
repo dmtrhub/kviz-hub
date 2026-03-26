@@ -4,7 +4,7 @@ namespace KvizHub.Application.Interfaces;
 
 public interface IQuizService
 {
-    Task<IEnumerable<QuizResponse>> GetQuizzesAsync(QuizFilterRequest? filter = null);
+    Task<PaginatedQuizResult> GetQuizzesAsync(QuizFilterRequest? filter = null);
 
     Task<QuizResponse?> GetQuizByIdAsync(int id);
 

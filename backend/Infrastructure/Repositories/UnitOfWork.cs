@@ -1,14 +1,17 @@
 using KvizHub.Application.Interfaces.Repositories;
 using KvizHub.Domain.Entities.Quizzes;
 using KvizHub.Infrastructure.Data;
-using KvizHub.Infrastructure.Repositories;
+using Microsoft.EntityFrameworkCore.Storage;
+
+namespace KvizHub.Infrastructure.Repositories;
 
 public class UnitOfWork : IUnitOfWork
 {
     private readonly ApplicationDbContext _context;
+    private IDbContextTransaction? _currentTransaction;
 
     public IQuizRepository Quizzes { get; }
-    public ICategoryRepository Categories { get; }
+    public IGenericRepository<Category> Categories { get; }
     public IUserRepository Users { get; }
     public IGenericRepository<Question> Questions { get; }
     public IGenericRepository<QuizAttempt> QuizAttempts { get; }
@@ -23,7 +26,7 @@ public class UnitOfWork : IUnitOfWork
         _context = context;
 
         Quizzes = new QuizRepository(_context);
-        Categories = new CategoryRepository(_context);
+        Categories = new GenericRepository<Category>(_context);
         Users = new UserRepository(_context);
         Questions = new GenericRepository<Question>(_context);
         QuizAttempts = new GenericRepository<QuizAttempt>(_context);
@@ -34,7 +37,45 @@ public class UnitOfWork : IUnitOfWork
         AnswerOptions = new GenericRepository<AnswerOption>(_context);
     }
 
+    public async Task BeginTransactionAsync()
+    {
+        if (_currentTransaction != null)
+        {
+            return;
+        }
+
+        _currentTransaction = await _context.Database.BeginTransactionAsync();
+    }
+
+    public async Task CommitTransactionAsync()
+    {
+        if (_currentTransaction == null)
+        {
+            return;
+        }
+
+        await _currentTransaction.CommitAsync();
+        await _currentTransaction.DisposeAsync();
+        _currentTransaction = null;
+    }
+
+    public async Task RollbackTransactionAsync()
+    {
+        if (_currentTransaction == null)
+        {
+            return;
+        }
+
+        await _currentTransaction.RollbackAsync();
+        await _currentTransaction.DisposeAsync();
+        _currentTransaction = null;
+    }
+
     public async Task<int> SaveChangesAsync() => await _context.SaveChangesAsync();
 
-    public void Dispose() => _context.Dispose();
+    public void Dispose()
+    {
+        _currentTransaction?.Dispose();
+        _context.Dispose();
+    }
 }

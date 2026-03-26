@@ -1,6 +1,5 @@
 ﻿using KvizHub.Application.DTOs.Category;
 using KvizHub.Application.DTOs.Question;
-using KvizHub.Domain.Enums;
 
 namespace KvizHub.Application.DTOs.Quiz;
 

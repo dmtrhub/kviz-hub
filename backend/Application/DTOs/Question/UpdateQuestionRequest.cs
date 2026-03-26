@@ -1,9 +1,9 @@
 ﻿using KvizHub.Application.DTOs.AnswerOption;
-using KvizHub.Domain.Enums;
 
 namespace KvizHub.Application.DTOs.Question;
 
 public record UpdateQuestionRequest(
+    int QuizId,
     string Text,
     string Type,
     int Points,

@@ -10,6 +10,12 @@ public class LeaderboardEntryConfiguration : IEntityTypeConfiguration<Leaderboar
     {
         builder.HasKey(le => le.Id);
 
+        builder.HasIndex(le => new { le.QuizId, le.Score, le.Duration, le.AchievedAt })
+            .HasDatabaseName("IX_LeaderboardEntries_Quiz_Score_Duration_AchievedAt");
+
+        builder.HasIndex(le => new { le.UserId, le.QuizId })
+            .HasDatabaseName("IX_LeaderboardEntries_User_Quiz");
+
         builder.Property(le => le.Score)
             .IsRequired();
 
