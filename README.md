@@ -63,37 +63,35 @@ kviz-hub/
 
 ## Screenshots
 
-> Create folder: `docs/images/`
-
 1. **Home / Quiz Catalog**
    - Suggested file: `docs/images/home-quiz-catalog.png`
    - Show filters and quiz cards
 
-   `![Home - Quiz Catalog](docs/images/home-quiz-catalog.png)`
+   ![Home - Quiz Catalog](docs/images/home-quiz-catalog.png)
 
 2. **Quiz Solving Screen**
    - Suggested file: `docs/images/quiz-attempt.png`
    - Show question UI and answer selection
 
-   `![Quiz Attempt](docs/images/quiz-attempt.png)`
+   ![Quiz Attempt](docs/images/quiz-attempt.png)
 
 3. **Results Screen**
    - Suggested file: `docs/images/results-screen.png`
    - Show score, percentage, duration, and summary
 
-   `![Results](docs/images/results-screen.png)`
+   ![Results](docs/images/results-screen.png)
 
 4. **Leaderboard**
    - Suggested file: `docs/images/leaderboard.png`
    - Show ranking table
 
-   `![Leaderboard](docs/images/leaderboard.png)`
+   ![Leaderboard](docs/images/leaderboard.png)
 
 5. **Admin Panel (optional but recommended)**
    - Suggested file: `docs/images/admin-panel.png`
    - Show quiz/question/category management
 
-   `![Admin Panel](docs/images/admin-panel.png)`
+   ![Admin Panel](docs/images/admin-panel.png)
 
 ---
 
