@@ -11,7 +11,7 @@ const ResultsActions: React.FC<ResultsActionsProps> = ({
   onTryAgain 
 }) => {
   return (
-    <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-200">
+    <div className="surface-card rounded-2xl p-6">
       <div className="flex flex-col sm:flex-row gap-4 justify-center">
         <button
           onClick={onBackToQuizzes}

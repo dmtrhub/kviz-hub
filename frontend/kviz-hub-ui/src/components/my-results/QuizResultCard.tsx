@@ -28,7 +28,7 @@ const QuizResultCard: React.FC<QuizResultCardProps> = ({ result, onViewDetails }
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-200 hover:border-blue-300 transition-all duration-200">
+    <div className="surface-card rounded-2xl p-6 hover:border-blue-300 transition-all duration-200">
       <div className="flex flex-col lg:flex-row justify-between items-start gap-4">
         <div className="flex-1">
           <h3 className="text-lg font-semibold text-gray-900 mb-3">

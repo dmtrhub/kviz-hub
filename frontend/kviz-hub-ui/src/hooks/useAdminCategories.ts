@@ -1,23 +1,19 @@
 import { useState, useEffect } from 'react';
 import { adminApi } from '../api/adminApi';
 import type { Category } from '../models/Category';
+import { useAsyncStatus } from './useAsyncStatus';
 
 export const useAdminCategories = () => {
   const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { loading, error, execute } = useAsyncStatus({ initialLoading: true });
 
   const fetchCategories = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const data = await adminApi.getAllCategories();
+    const data = await execute(() => adminApi.getAllCategories(), {
+      errorMessage: 'Failed to fetch categories',
+    });
+
+    if (data) {
       setCategories(data);
-    } catch (err) {
-      setError('Failed to fetch categories');
-      console.error('Error fetching categories:', err);
-    } finally {
-      setLoading(false);
     }
   };
 

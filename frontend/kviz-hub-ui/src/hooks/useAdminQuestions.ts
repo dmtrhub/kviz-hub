@@ -1,54 +1,63 @@
 import { useState, useEffect } from 'react';
 import { quizService } from '../services/QuizService';
 import type { Question } from '../models/Question';
+import { useAsyncStatus } from './useAsyncStatus';
 
 export const useAdminQuestions = () => {
   const [questions, setQuestions] = useState<Question[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { loading, error, execute } = useAsyncStatus({ initialLoading: true });
+
+  const executeMutation = async <T>(
+    operation: () => Promise<T>,
+    errorMessage: string
+  ): Promise<T> => {
+    const result = await execute(operation, {
+      errorMessage,
+      withLoading: false,
+      clearError: false,
+    });
+
+    if (result === null) {
+      throw new Error(errorMessage);
+    }
+
+    return result;
+  };
 
   const fetchQuestions = async () => {
-    try {
-      setLoading(true);
-      const data = await quizService.adminGetAllQuestions();
+    const data = await execute(() => quizService.adminGetAllQuestions(), {
+      errorMessage: 'Failed to fetch questions',
+    });
+
+    if (data) {
       setQuestions(data);
-    } catch (err) {
-      setError('Failed to fetch questions');
-    } finally {
-      setLoading(false);
     }
   };
 
   const createQuestion = async (questionData: any) => {
-    try {
-      const newQuestion = await quizService.adminCreateQuestion(
-        questionData.quizId, 
-        questionData
-      );
-      setQuestions(prev => [...prev, newQuestion]);
-      return newQuestion;
-    } catch (err) {
-      throw new Error('Failed to create question');
-    }
+    const newQuestion = await executeMutation(
+      () => quizService.adminCreateQuestion(questionData.quizId, questionData),
+      'Failed to create question'
+    );
+    setQuestions(prev => [...prev, newQuestion]);
+    return newQuestion;
   };
 
   const updateQuestion = async (id: number, questionData: any) => {
-    try {
-      const updatedQuestion = await quizService.adminUpdateQuestion(id, questionData);
-      setQuestions(prev => prev.map(q => q.id === id ? updatedQuestion : q));
-      return updatedQuestion;
-    } catch (err) {
-      throw new Error('Failed to update question');
-    }
+    const updatedQuestion = await executeMutation(
+      () => quizService.adminUpdateQuestion(id, questionData),
+      'Failed to update question'
+    );
+    setQuestions(prev => prev.map(q => q.id === id ? updatedQuestion : q));
+    return updatedQuestion;
   };
 
   const deleteQuestion = async (id: number) => {
-    try {
-      await quizService.adminDeleteQuestion(id);
-      setQuestions(prev => prev.filter(q => q.id !== id));
-    } catch (err) {
-      throw new Error('Failed to delete question');
-    }
+    await executeMutation(
+      () => quizService.adminDeleteQuestion(id),
+      'Failed to delete question'
+    );
+    setQuestions(prev => prev.filter(q => q.id !== id));
   };
 
   useEffect(() => {

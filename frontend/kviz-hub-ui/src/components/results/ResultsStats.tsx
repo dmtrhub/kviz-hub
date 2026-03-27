@@ -31,12 +31,12 @@ const ResultsStats: React.FC<ResultsStatsProps> = ({ attempt }) => {
       label: "Questions Answered", 
       value: attempt.answers.length,
       icon: FaList,
-      color: "text-purple-600"
+      color: "text-slate-700"
     }
   ];
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm p-6 mb-8 border border-gray-200">
+    <div className="surface-card rounded-2xl p-6 mb-8">
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {stats.map((stat, index) => (
           <div key={index} className="text-center bg-gray-50 rounded-xl p-4 border border-gray-200">

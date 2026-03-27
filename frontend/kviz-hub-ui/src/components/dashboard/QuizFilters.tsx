@@ -24,7 +24,7 @@ const QuizFilters: React.FC<QuizFiltersProps> = ({
   difficulties,
 }) => {
   return (
-    <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
+    <div className="surface-card rounded-xl p-6 mb-8">
       <div className="flex flex-col lg:flex-row gap-4">
         <div className="relative flex-1">
           <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />

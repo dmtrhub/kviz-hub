@@ -33,7 +33,7 @@ const QuizCard: React.FC<QuizCardProps> = ({ quiz, onEdit, onDelete }) => {
   };
 
   const getQuizGradient = () => {
-    return "from-blue-600 to-purple-600";
+    return "from-blue-600 to-slate-700";
   };
 
   const handleDelete = () => {
@@ -47,33 +47,31 @@ const QuizCard: React.FC<QuizCardProps> = ({ quiz, onEdit, onDelete }) => {
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 flex flex-col border border-gray-100">
-      {/* Header with unified gradient */}
-      <div
-        className={`bg-gradient-to-r ${getQuizGradient()} rounded-xl -mx-2 -mt-2 mb-4 p-4 text-white`}
-      >
-        <h2 className="text-xl font-bold mb-1">{quiz.title}</h2>
-        <p className="text-white/90 text-sm line-clamp-2">{quiz.description}</p>
+    <div className="surface-card rounded-2xl p-6 hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 flex flex-col">
+      {/* Header with unified styling */}
+      <div className="rounded-xl -mx-2 -mt-2 mb-4 p-4 bg-blue-50 border-l-4 border-blue-500">
+        <h2 className="text-xl font-bold text-slate-900 mb-1">{quiz.title}</h2>
+        <p className="text-slate-700 text-sm line-clamp-2">{quiz.description}</p>
       </div>
 
       {/* Meta info */}
       <div className="space-y-3 mb-4">
-        <div className="flex items-center text-sm text-gray-600 bg-gray-50 rounded-lg p-3">
-          <FaQuestionCircle className="mr-3 text-blue-500" />
+        <div className="flex items-center text-sm text-slate-700 bg-blue-50 rounded-lg p-3">
+          <FaQuestionCircle className="mr-3 text-blue-600" />
           <div>
             <div className="font-semibold">
               {quiz.questionCount ?? 0} questions
             </div>
-            <div className="text-xs text-gray-500">Total questions</div>
+            <div className="text-xs text-slate-600">Total questions</div>
           </div>
         </div>
 
         {quiz.timeLimit && (
-          <div className="flex items-center text-sm text-gray-600 bg-gray-50 rounded-lg p-3">
-            <FaClock className="mr-3 text-purple-500" />
+          <div className="flex items-center text-sm text-slate-700 bg-slate-50 rounded-lg p-3">
+            <FaClock className="mr-3 text-slate-600" />
             <div>
               <div className="font-semibold">{quiz.timeLimit} minutes</div>
-              <div className="text-xs text-gray-500">Time limit</div>
+              <div className="text-xs text-slate-600">Time limit</div>
             </div>
           </div>
         )}
@@ -96,7 +94,7 @@ const QuizCard: React.FC<QuizCardProps> = ({ quiz, onEdit, onDelete }) => {
           {quiz.categories?.map((cat) => (
             <span
               key={cat.id}
-              className="bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 px-3 py-1.5 rounded-full text-xs font-medium border border-blue-200"
+              className="bg-blue-100 text-blue-700 px-3 py-1.5 rounded-full text-xs font-medium border border-blue-200"
             >
               {cat.name}
             </span>
@@ -105,21 +103,19 @@ const QuizCard: React.FC<QuizCardProps> = ({ quiz, onEdit, onDelete }) => {
       </div>
 
       {/* Actions */}
-      <div className="flex space-x-2 mt-auto pt-4 border-t border-gray-100">
+      <div className="flex space-x-2 mt-auto pt-4 border-t border-slate-200">
         <button
           onClick={() => onEdit(quiz)}
-          className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 py-3 rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-200 font-medium text-sm text-center shadow-md hover:shadow-lg flex items-center justify-center"
+          className="bg-gradient-to-r from-blue-500 to-slate-700 text-white p-2.5 rounded-lg transition-all duration-200 shadow-sm hover:from-blue-600 hover:to-slate-800 hover:shadow-md"
         >
-          <FaEdit className="mr-2" />
-          Edit
+          <FaEdit className="text-sm" />
         </button>
 
         <button
           onClick={handleDelete}
-          className="flex-1 bg-gradient-to-r from-red-500 to-red-600 text-white px-4 py-3 rounded-xl hover:from-red-600 hover:to-red-700 transition-all duration-200 font-medium text-sm text-center shadow-md hover:shadow-lg flex items-center justify-center"
+          className="bg-red-600 text-white p-2.5 rounded-lg hover:bg-red-700 transition-all duration-200 shadow-sm hover:shadow-md"
         >
-          <FaTrash className="mr-2" />
-          Delete
+          <FaTrash className="text-sm" />
         </button>
       </div>
     </div>
@@ -181,12 +177,10 @@ const AdminQuizzes: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 p-6">
-        <div className="flex justify-center items-center py-20">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-600 text-lg">Loading quizzes...</p>
-          </div>
+      <div className="py-16 text-center">
+        <div className="inline-block">
+          <div className="animate-spin rounded-full h-12 w-12 border-2 border-slate-300 border-t-slate-900 mb-4"></div>
+          <p className="text-slate-600">Loading quizzes...</p>
         </div>
       </div>
     );
@@ -194,40 +188,33 @@ const AdminQuizzes: React.FC = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 p-6">
-        <div className="max-w-6xl mx-auto">
-          <div className="bg-red-50 border border-red-200 rounded-2xl p-6 shadow-sm">
-            <div className="flex items-center mb-4">
-              <div className="bg-red-100 p-3 rounded-xl">
-                <FaTrash className="h-6 w-6 text-red-600" />
-              </div>
-              <h3 className="text-lg font-semibold text-red-800 ml-3">
-                Error Loading Quizzes
-              </h3>
-            </div>
-            <p className="text-red-700">{error}</p>
-          </div>
+      <div className="py-8">
+        <div className="surface-card rounded-2xl p-6 border-l-4 border-red-500">
+          <h3 className="text-lg font-semibold text-red-900 mb-2">
+            Error Loading Quizzes
+          </h3>
+          <p className="text-red-700">{error}</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 p-6">
-      <div className="max-w-7xl mx-auto">
+    <div>
+      <div>
         {/* Header */}
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-8">
           <div className="mb-6 lg:mb-0">
-            <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-2">
+            <h2 className="text-3xl font-bold text-slate-900 mb-2">
               Quiz Management
-            </h1>
-            <p className="text-gray-600 text-lg">
+            </h2>
+            <p className="text-slate-600">
               Create, edit, and manage your quiz collection
             </p>
           </div>
           <button
             onClick={handleCreateQuiz}
-            className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-300 font-medium shadow-lg hover:shadow-xl flex items-center"
+            className="btn-primary px-6 py-3 rounded-xl flex items-center"
           >
             <FaPlus className="mr-2" />
             Create New Quiz
@@ -235,55 +222,57 @@ const AdminQuizzes: React.FC = () => {
         </div>
 
         {/* Search */}
-        <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200 mb-8">
+        <div className="surface-card rounded-2xl p-6 mb-8">
           <div className="relative">
-            <FaSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            <FaSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400" />
             <input
               type="text"
               placeholder="Search quizzes by title, description, or category..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-12 pr-4 py-4 border border-gray-300 rounded-xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 text-lg"
+              className="w-full pl-11 pr-4 py-3 border border-slate-300 rounded-xl bg-slate-50 text-slate-800 placeholder-slate-400 transition-all focus:bg-white focus:ring-2 focus:ring-blue-400 focus:border-transparent"
             />
           </div>
         </div>
 
-        {/* Quizzes Grid */}
-        <div className="grid gap-8 md:grid-cols-2 xl:grid-cols-3">
-          {filteredQuizzes.length === 0 ? (
-            <div className="col-span-full text-center py-16 bg-white rounded-2xl shadow-lg border border-gray-200">
-              <div className="text-gray-400 text-8xl mb-6">📚</div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-3">
-                {quizzes.length === 0
-                  ? "No quizzes created yet"
-                  : "No quizzes found"}
-              </h3>
-              <p className="text-gray-600 text-lg mb-8 max-w-md mx-auto">
-                {quizzes.length === 0
-                  ? "Start building your quiz collection by creating your first engaging quiz."
-                  : "Try adjusting your search terms to find what you're looking for."}
-              </p>
-              {quizzes.length === 0 && (
-                <button
-                  onClick={handleCreateQuiz}
-                  className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-300 font-medium text-lg shadow-lg hover:shadow-xl inline-flex items-center"
-                >
-                  <FaPlus className="mr-3" />
-                  Create Your First Quiz
-                </button>
-              )}
+      {/* Quizzes Grid */}
+        {filteredQuizzes.length === 0 ? (
+          <div className="col-span-full text-center py-20 surface-card rounded-2xl">
+            <div className="bg-purple-100 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6">
+              <FaQuestionCircle className="text-3xl text-purple-600" />
             </div>
-          ) : (
-            filteredQuizzes.map((quiz) => (
+            <h3 className="text-2xl font-bold text-slate-900 mb-3">
+              {quizzes.length === 0
+                ? "No quizzes created yet"
+                : "No quizzes found"}
+            </h3>
+            <p className="text-slate-600 mb-8 max-w-md mx-auto">
+              {quizzes.length === 0
+                ? "Start building your quiz collection by creating your first engaging quiz."
+                : "Try adjusting your search terms to find what you're looking for."}
+            </p>
+            {quizzes.length === 0 && (
+              <button
+                onClick={handleCreateQuiz}
+                className="btn-primary px-6 py-3 rounded-xl inline-flex items-center"
+              >
+                <FaPlus className="mr-2" />
+                Create Your First Quiz
+              </button>
+            )}
+          </div>
+        ) : (
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {filteredQuizzes.map((quiz) => (
               <QuizCard
                 key={quiz.id}
                 quiz={quiz}
                 onEdit={handleEditQuiz}
                 onDelete={handleDelete}
               />
-            ))
-          )}
-        </div>
+            ))}
+          </div>
+        )}
 
         {/* Modal */}
         <QuizModal

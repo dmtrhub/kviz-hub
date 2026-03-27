@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { QuizService } from "../services/QuizService";
+import { quizService } from "../services/QuizService";
 import type { LeaderboardEntry, LeaderboardFilter, QuizOption } from "../models/Leaderboard";
+import { useAsyncStatus } from "../hooks/useAsyncStatus";
 
 // Komponente
 import LeaderboardHeader from "../components/leaderboard/LeaderboardHeader";
@@ -13,13 +14,11 @@ import ErrorScreen from "../components/common/ErrorScreen";
 
 const Leaderboard: React.FC = () => {
   const navigate = useNavigate();
-  const quizService = new QuizService();
-  
+
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [quizzes, setQuizzes] = useState<QuizOption[]>([]);
   const [userRank, setUserRank] = useState<LeaderboardEntry | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { loading, error, execute } = useAsyncStatus({ initialLoading: true });
   
   const [filters, setFilters] = useState<LeaderboardFilter>({
     quizId: undefined,
@@ -27,38 +26,39 @@ const Leaderboard: React.FC = () => {
     top: 50
   });
 
-  useEffect(() => {
-    const fetchLeaderboardData = async () => {
-      try {
-        setError(null);
-        setLoading(true);
-        
-        // Uzmi leaderboard podatke
-        const leaderboardData = await quizService.getLeaderboard(filters);
-        setLeaderboard(leaderboardData.entries);
-        
-        // Uzmi user rank
-        const userRankData = await quizService.getMyRank(filters);
-        setUserRank(userRankData.entries[0] || null);
-        
-        // Uzmi listu kvizova za filter
-        const quizzesData = await quizService.getAllQuizzes();
-        const quizOptions: QuizOption[] = quizzesData.map(quiz => ({
-          id: quiz.id,
-          title: quiz.title
-        }));
-        setQuizzes(quizOptions);
-        
-      } catch (err) {
-        console.error("❌ Error fetching leaderboard:", err);
-        setError("Failed to load leaderboard data. Please try again.");
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchLeaderboardData = useCallback(async () => {
+    const data = await execute(
+      async () => {
+        const [leaderboardData, userRankData, quizzesData] = await Promise.all([
+          quizService.getLeaderboard(filters),
+          quizService.getMyRank(filters),
+          quizService.getAllQuizzes(),
+        ]);
 
+        return {
+          entries: leaderboardData.entries,
+          rank: userRankData.entries[0] || null,
+          quizOptions: quizzesData.map((quiz) => ({
+            id: quiz.id,
+            title: quiz.title,
+          })),
+        };
+      },
+      {
+        errorMessage: "Failed to load leaderboard data. Please try again.",
+      }
+    );
+
+    if (data) {
+      setLeaderboard(data.entries);
+      setUserRank(data.rank);
+      setQuizzes(data.quizOptions);
+    }
+  }, [execute, filters]);
+
+  useEffect(() => {
     fetchLeaderboardData();
-  }, [filters]);
+  }, [fetchLeaderboardData]);
 
   const handleFilterChange = (newFilters: LeaderboardFilter) => {
     setFilters(newFilters);
@@ -72,14 +72,14 @@ const Leaderboard: React.FC = () => {
     return (
       <ErrorScreen 
         message={error} 
-        onRetry={() => window.location.reload()}
+        onRetry={fetchLeaderboardData}
         buttonText="Try Again"
       />
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 pt-20 pb-8">
+    <div className="page-shell">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <LeaderboardHeader onBackToQuizzes={() => navigate("/quizzes")} />
         

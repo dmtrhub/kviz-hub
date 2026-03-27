@@ -90,6 +90,24 @@ const QuestionResult: React.FC<QuestionResultProps> = ({ userAnswer, questionNum
           {isCorrect ? `+${userAnswer.points} points awarded` : '0 points'}
         </span>
       </div>
+
+      {userAnswer.details.length > 0 && (
+        <div className="mt-3 pt-3 border-t border-gray-200">
+          <div className="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-2">
+            Answer Details
+          </div>
+          <ul className="space-y-1">
+            {userAnswer.details.map((detail, index) => (
+              <li key={`${userAnswer.questionId}-${index}`} className="text-sm flex items-start gap-2">
+                <span className={detail.isCorrect ? 'text-green-600' : 'text-red-600'}>
+                  {detail.isCorrect ? '✓' : '✗'}
+                </span>
+                <span className="text-gray-700">{detail.text}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 };

@@ -22,7 +22,7 @@ const QuestionItem: React.FC<QuestionItemProps> = ({
      (userAnswer.selectedOptionIds && userAnswer.selectedOptionIds.length > 0));
 
   return (
-    <div className={`bg-white rounded-xl shadow-lg p-6 transition-all duration-300 ${
+    <div className={`surface-card rounded-xl p-6 transition-all duration-300 ${
       isAnswered ? 'ring-2 ring-green-200' : 'ring-1 ring-gray-200'
     }`}>
       <div className="flex items-start justify-between mb-4">

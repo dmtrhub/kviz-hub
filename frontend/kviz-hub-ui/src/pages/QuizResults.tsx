@@ -63,7 +63,7 @@ const QuizResults: React.FC = () => {
     : 0;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 pt-20 pb-8">
+    <div className="page-shell">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <ResultsHeader attempt={attempt} percentage={percentage} />
         <ResultsStats attempt={attempt} percentage={percentage} />

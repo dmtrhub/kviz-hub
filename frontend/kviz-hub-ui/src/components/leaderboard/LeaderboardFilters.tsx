@@ -51,39 +51,39 @@ const LeaderboardFilters: React.FC<LeaderboardFiltersProps> = ({
   const hasActiveFilters = filters.quizId || filters.timePeriod !== "all" || filters.top !== 50;
 
   return (
-    <div className="bg-gradient-to-br from-white to-blue-50 rounded-2xl shadow-lg p-6 border border-blue-100">
+    <div className="surface-card rounded-2xl p-6 md:p-7">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center space-x-3">
-          <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-2 rounded-lg">
-            <FaFilter className="text-white text-sm" />
+          <div className="rounded-xl bg-gradient-to-r from-blue-500 to-slate-700 p-2.5 shadow-md">
+            <FaFilter className="text-sm text-white" />
           </div>
           <div>
-            <h3 className="text-lg font-bold text-gray-900">Leaderboard Filters</h3>
-            <p className="text-gray-500 text-sm">Refine your leaderboard view</p>
+            <h3 className="text-xl font-bold text-slate-900">Leaderboard Filters</h3>
+            <p className="text-sm text-slate-500">Refine results by quiz, period, and ranking range.</p>
           </div>
         </div>
         <button
           onClick={resetFilters}
-          className="bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 px-4 py-2 rounded-xl hover:from-gray-200 hover:to-gray-300 transition-all duration-200 font-medium flex items-center space-x-2 group"
+          className="btn-secondary inline-flex items-center space-x-2 rounded-xl px-4 py-2 font-medium"
         >
-          <FaSync className="text-gray-500 group-hover:rotate-180 transition-transform duration-500" />
+          <FaSync className="text-slate-500 transition-transform duration-500 group-hover:rotate-180" />
           <span>Reset</span>
         </button>
       </div>
 
-      {/* Filters Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+      {/* Filters Layout */}
+      <div className="mb-6 flex flex-col gap-5">
         {/* Quiz Filter */}
-        <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
-          <label className="block text-sm font-semibold text-gray-700 mb-3 flex items-center space-x-2">
+        <div className="rounded-xl border border-slate-200 bg-white/90 p-5 shadow-sm">
+          <label className="mb-3 flex items-center space-x-2 text-sm font-semibold text-slate-700">
             <FaChartBar className="text-blue-500" />
             <span>Select Quiz</span>
           </label>
           <select
             value={filters.quizId || "all"}
             onChange={handleQuizChange}
-            className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-gray-50 hover:bg-white"
+            className="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3.5 text-base text-slate-800 transition-all hover:bg-white focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-400"
           >
             <option value="all">All Quizzes</option>
             {quizzes.map(quiz => (
@@ -95,15 +95,15 @@ const LeaderboardFilters: React.FC<LeaderboardFiltersProps> = ({
         </div>
 
         {/* Time Period Filter */}
-        <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
-          <label className="block text-sm font-semibold text-gray-700 mb-3 flex items-center space-x-2">
-            <FaClock className="text-purple-500" />
+        <div className="rounded-xl border border-slate-200 bg-white/90 p-5 shadow-sm">
+          <label className="mb-3 flex items-center space-x-2 text-sm font-semibold text-slate-700">
+            <FaClock className="text-slate-600" />
             <span>Time Period</span>
           </label>
           <select
             value={filters.timePeriod || "all"}
             onChange={handleTimePeriodChange}
-            className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all bg-gray-50 hover:bg-white"
+            className="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3.5 text-base text-slate-800 transition-all hover:bg-white focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-400"
           >
             <option value="all">All Time</option>
             <option value="weekly">This Week</option>
@@ -112,15 +112,15 @@ const LeaderboardFilters: React.FC<LeaderboardFiltersProps> = ({
         </div>
 
         {/* Top Results Filter */}
-        <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
-          <label className="block text-sm font-semibold text-gray-700 mb-3 flex items-center space-x-2">
+        <div className="rounded-xl border border-slate-200 bg-white/90 p-5 shadow-sm">
+          <label className="mb-3 flex items-center space-x-2 text-sm font-semibold text-slate-700">
             <FaTrophy className="text-yellow-500" />
             <span>Show Top</span>
           </label>
           <select
             value={filters.top || 50}
             onChange={handleTopChange}
-            className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all bg-gray-50 hover:bg-white"
+            className="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3.5 text-base text-slate-800 transition-all hover:bg-white focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-400"
           >
             <option value={10}>Top 10</option>
             <option value={25}>Top 25</option>
@@ -132,13 +132,13 @@ const LeaderboardFilters: React.FC<LeaderboardFiltersProps> = ({
 
       {/* Active Filters */}
       {hasActiveFilters && (
-        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4 border border-blue-200">
+        <div className="rounded-xl border border-blue-200 bg-gradient-to-r from-blue-50 to-slate-50 p-4">
           <div className="flex items-center justify-between mb-3">
-            <p className="text-sm font-semibold text-blue-800 flex items-center space-x-2">
-              <span>🎯</span>
+            <p className="flex items-center space-x-2 text-sm font-semibold text-blue-800">
+              <FaFilter className="text-blue-600" />
               <span>Active Filters</span>
             </p>
-            <span className="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded-full">
+            <span className="rounded-full bg-blue-100 px-2 py-1 text-xs text-blue-600">
               {[
                 filters.quizId ? 1 : 0,
                 filters.timePeriod !== "all" ? 1 : 0,
@@ -150,7 +150,7 @@ const LeaderboardFilters: React.FC<LeaderboardFiltersProps> = ({
           <div className="flex flex-wrap gap-2">
             {filters.quizId && (
               <span className="inline-flex items-center space-x-2 bg-blue-100 text-blue-700 px-3 py-1.5 rounded-full text-sm font-medium border border-blue-200">
-                <span>📝 {getSelectedQuizTitle()}</span>
+                <span>{getSelectedQuizTitle()}</span>
                 <button 
                   onClick={() => removeFilter('quizId')}
                   className="text-blue-500 hover:text-blue-700 transition-colors"
@@ -161,11 +161,11 @@ const LeaderboardFilters: React.FC<LeaderboardFiltersProps> = ({
             )}
             
             {filters.timePeriod !== "all" && (
-              <span className="inline-flex items-center space-x-2 bg-purple-100 text-purple-700 px-3 py-1.5 rounded-full text-sm font-medium border border-purple-200">
-                <span>⏰ {filters.timePeriod === "weekly" ? "This Week" : "This Month"}</span>
+              <span className="inline-flex items-center space-x-2 bg-slate-100 text-slate-700 px-3 py-1.5 rounded-full text-sm font-medium border border-slate-200">
+                <span>{filters.timePeriod === "weekly" ? "This Week" : "This Month"}</span>
                 <button 
                   onClick={() => removeFilter('timePeriod')}
-                  className="text-purple-500 hover:text-purple-700 transition-colors"
+                  className="text-slate-600 hover:text-slate-700 transition-colors"
                 >
                   <FaTimes className="text-xs" />
                 </button>
@@ -174,7 +174,7 @@ const LeaderboardFilters: React.FC<LeaderboardFiltersProps> = ({
             
             {filters.top !== 50 && (
               <span className="inline-flex items-center space-x-2 bg-yellow-100 text-yellow-700 px-3 py-1.5 rounded-full text-sm font-medium border border-yellow-200">
-                <span>🏆 Top {filters.top}</span>
+                <span>Top {filters.top}</span>
                 <button 
                   onClick={() => removeFilter('top')}
                   className="text-yellow-500 hover:text-yellow-700 transition-colors"
@@ -189,9 +189,9 @@ const LeaderboardFilters: React.FC<LeaderboardFiltersProps> = ({
 
       {/* No Active Filters Message */}
       {!hasActiveFilters && (
-        <div className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl p-4 border border-gray-200 text-center">
-          <p className="text-gray-500 text-sm flex items-center justify-center space-x-2">
-            <span>🔍</span>
+        <div className="rounded-xl border border-slate-200 bg-gradient-to-r from-slate-50 to-slate-100 p-4 text-center">
+          <p className="flex items-center justify-center space-x-2 text-sm text-slate-500">
+            <FaFilter className="text-slate-400" />
             <span>No filters applied - showing all results</span>
           </p>
         </div>

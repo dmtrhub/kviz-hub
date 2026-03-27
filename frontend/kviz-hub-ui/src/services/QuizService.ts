@@ -11,105 +11,103 @@ import type { QuizAttemptResponse } from '../models/QuizAttempt';
 export class QuizService {
   // Public methods (for regular users)
   async getAllQuizzes() {
-    return await quizApi.getAllQuizzes();
+    return quizApi.getAllQuizzes();
   }
   
   async getQuizById(id: number) {
-    return await quizApi.getQuizById(id);
+    return quizApi.getQuizById(id);
   }
   
   async startQuiz(quizId: number) {
-    return await quizApi.startQuiz(quizId);
+    return quizApi.startQuiz(quizId);
   }
   
   async submitQuiz(attemptId: number, answers: any) {
-    return await quizAttemptApi.finishAttempt(attemptId, { answers });
+    return quizAttemptApi.finishAttempt(attemptId, { answers });
   }
   
   async getQuizResults(attemptId: number) {
-    return await quizAttemptApi.getAttemptById(attemptId);
+    return quizAttemptApi.getAttemptById(attemptId);
   }
   
   async getMyResults() {
-    return await quizAttemptApi.getMyResults();
+    return quizAttemptApi.getMyResults();
   }
   
   async getMyProgress() {
-    return await quizAttemptApi.getMyProgress();
+    return quizAttemptApi.getMyProgress();
   }
 
   async getLeaderboard(filters?: LeaderboardFilter): Promise<LeaderboardResponse> {
-    return await leaderboardApi.getLeaderboard(filters);
+    return leaderboardApi.getLeaderboard(filters);
   }
 
   async getMyRank(filters?: LeaderboardFilter): Promise<LeaderboardResponse> {
-    return await leaderboardApi.getMyRank(filters);
+    return leaderboardApi.getMyRank(filters);
   }
 
   // Admin methods - Quizzes
   async adminGetAllQuizzes(): Promise<Quiz[]> {
-    return await adminApi.getAllQuizzes();
+    return adminApi.getAllQuizzes();
   }
   
   async adminCreateQuiz(quizData: any): Promise<Quiz> {
-    return await adminApi.createQuiz(quizData);
+    return adminApi.createQuiz(quizData);
   }
   
   async adminUpdateQuiz(id: number, quizData: any): Promise<Quiz> {
-    return await adminApi.updateQuiz(id, quizData);
+    return adminApi.updateQuiz(id, quizData);
   }
   
   async adminDeleteQuiz(id: number): Promise<void> {
-    return await adminApi.deleteQuiz(id);
+    return adminApi.deleteQuiz(id);
   }
 
   // Admin methods - Categories
   async adminGetAllCategories(): Promise<Category[]> {
-    return await adminApi.getAllCategories();
+    return adminApi.getAllCategories();
   }
   
   async adminCreateCategory(categoryData: any): Promise<Category> {
-    return await adminApi.createCategory(categoryData);
+    return adminApi.createCategory(categoryData);
   }
   
   async adminUpdateCategory(id: number, categoryData: any): Promise<Category> {
-    return await adminApi.updateCategory(id, categoryData);
+    return adminApi.updateCategory(id, categoryData);
   }
   
   async adminDeleteCategory(id: number): Promise<void> {
-    return await adminApi.deleteCategory(id);
+    return adminApi.deleteCategory(id);
   }
 
   // Admin methods - Questions
   async adminGetAllQuestions(): Promise<Question[]> {
-    return await adminApi.getAllQuestions();
+    return adminApi.getAllQuestions();
   }
   
   async adminGetQuestionsByQuiz(quizId: number): Promise<Question[]> {
-    return await adminApi.getQuestionsByQuiz(quizId);
+    return adminApi.getQuestionsByQuiz(quizId);
   }
   
   async adminCreateQuestion(quizId: number, questionData: any): Promise<Question> {
-    return await adminApi.createQuestion(quizId, questionData);
+    return adminApi.createQuestion(quizId, questionData);
   }
   
   async adminUpdateQuestion(id: number, questionData: any): Promise<Question> {
-    return await adminApi.updateQuestion(id, questionData);
+    return adminApi.updateQuestion(id, questionData);
   }
   
   async adminDeleteQuestion(id: number): Promise<void> {
-    return await adminApi.deleteQuestion(id);
+    return adminApi.deleteQuestion(id);
   }
 
   // Admin methods - Results/Attempts
   async adminGetAllQuizAttempts(): Promise<QuizAttemptResponse[]> {
-    console.log('👑 adminGetAllQuizAttempts called in QuizService');
-    return await adminApi.getAllQuizAttempts();
+    return adminApi.getAllQuizAttempts();
   }
   
   async adminGetQuizAttemptsByQuiz(quizId: number): Promise<QuizAttemptResponse[]> {
-    console.log('👑 adminGetQuizAttemptsByQuiz called in QuizService');
-    return await adminApi.getQuizAttemptsByQuiz(quizId);
+    return adminApi.getQuizAttemptsByQuiz(quizId);
   }
 }
 

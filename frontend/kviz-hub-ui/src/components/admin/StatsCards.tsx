@@ -33,59 +33,51 @@ export const StatsCards: React.FC<StatsCardsProps> = ({
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-      <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200">
-        <div className="flex items-center">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+      <div className="surface-card rounded-2xl p-6 hover:shadow-lg transition-all duration-300">
+        <div className="flex items-start justify-between">
+          <div>
+            <div className="text-slate-600 text-sm font-medium mb-1">Total Attempts</div>
+            <div className="text-3xl font-bold text-slate-900">{stats.total}</div>
+          </div>
           <div className="bg-blue-100 p-3 rounded-xl">
-            <FaUser className="h-6 w-6 text-blue-600" />
-          </div>
-          <div className="ml-4">
-            <div className="text-2xl font-bold text-gray-900">
-              {stats.total}
-            </div>
-            <div className="text-sm text-gray-600">Total Attempts</div>
+            <FaUser className="h-5 w-5 text-blue-600" />
           </div>
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200">
-        <div className="flex items-center">
+      <div className="surface-card rounded-2xl p-6 hover:shadow-lg transition-all duration-300">
+        <div className="flex items-start justify-between">
+          <div>
+            <div className="text-slate-600 text-sm font-medium mb-1">Completed</div>
+            <div className="text-3xl font-bold text-slate-900">{stats.completed}</div>
+          </div>
           <div className="bg-green-100 p-3 rounded-xl">
-            <FaCheck className="h-6 w-6 text-green-600" />
-          </div>
-          <div className="ml-4">
-            <div className="text-2xl font-bold text-gray-900">
-              {stats.completed}
-            </div>
-            <div className="text-sm text-gray-600">Completed</div>
+            <FaCheck className="h-5 w-5 text-green-600" />
           </div>
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200">
-        <div className="flex items-center">
-          <div className="bg-purple-100 p-3 rounded-xl">
-            <FaChartBar className="h-6 w-6 text-purple-600" />
+      <div className="surface-card rounded-2xl p-6 hover:shadow-lg transition-all duration-300">
+        <div className="flex items-start justify-between">
+          <div>
+            <div className="text-slate-600 text-sm font-medium mb-1">Average Score</div>
+            <div className="text-3xl font-bold text-slate-900">{stats.averageScore}%</div>
           </div>
-          <div className="ml-4">
-            <div className="text-2xl font-bold text-gray-900">
-              {stats.averageScore}%
-            </div>
-            <div className="text-sm text-gray-600">Average Score</div>
+          <div className="bg-slate-100 p-3 rounded-xl">
+            <FaChartBar className="h-5 w-5 text-slate-700" />
           </div>
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200">
-        <div className="flex items-center">
+      <div className="surface-card rounded-2xl p-6 hover:shadow-lg transition-all duration-300">
+        <div className="flex items-start justify-between">
+          <div>
+            <div className="text-slate-600 text-sm font-medium mb-1">Avg Duration</div>
+            <div className="text-3xl font-bold text-slate-900">{stats.averageDuration}m</div>
+          </div>
           <div className="bg-orange-100 p-3 rounded-xl">
-            <FaClock className="h-6 w-6 text-orange-600" />
-          </div>
-          <div className="ml-4">
-            <div className="text-2xl font-bold text-gray-900">
-              {stats.averageDuration}m
-            </div>
-            <div className="text-sm text-gray-600">Avg Duration</div>
+            <FaClock className="h-5 w-5 text-orange-600" />
           </div>
         </div>
       </div>

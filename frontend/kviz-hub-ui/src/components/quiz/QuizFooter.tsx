@@ -22,11 +22,11 @@ const QuizFooter: React.FC<QuizFooterProps> = ({
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-lg p-6 mt-8">
+    <div className="surface-card rounded-xl p-6 mt-8">
       <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
         <button
           onClick={handleBackClick}
-          className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-medium"
+          className="btn-secondary px-6 py-3 rounded-lg font-medium"
         >
           ← Back to Quizzes
         </button>
@@ -38,7 +38,7 @@ const QuizFooter: React.FC<QuizFooterProps> = ({
           <button
             onClick={onSubmit}
             disabled={submitting}
-            className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 rounded-lg hover:from-blue-700 hover:to-purple-700 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed transition font-medium shadow-lg"
+            className="btn-primary px-8 py-3 rounded-lg disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed"
           >
             {submitting ? "Submitting..." : "Submit Quiz"}
           </button>

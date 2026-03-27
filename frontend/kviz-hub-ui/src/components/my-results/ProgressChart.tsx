@@ -21,7 +21,7 @@ const ProgressChart: React.FC<ProgressChartProps> = ({ progress }) => {
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-200">
+    <div className="surface-card rounded-2xl p-6">
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-lg font-semibold text-gray-900">{progress.quizTitle}</h3>
         <div className="text-right">

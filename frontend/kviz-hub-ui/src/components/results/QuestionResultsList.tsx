@@ -8,7 +8,7 @@ interface QuestionResultsListProps {
 
 const QuestionResultsList: React.FC<QuestionResultsListProps> = ({ answers }) => {
   return (
-    <div className="bg-white rounded-2xl shadow-sm p-6 mb-8 border border-gray-200">
+    <div className="surface-card rounded-2xl p-6 mb-8">
       <h2 className="text-xl font-semibold text-gray-900 mb-6">
         Detailed Results
       </h2>

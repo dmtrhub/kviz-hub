@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useEffect } from "react";
+import { createPortal } from "react-dom";
 import { FaTimes, FaChartBar } from "react-icons/fa";
 import type { QuizAttemptResponse } from "../../models/QuizAttempt";
 import { AnswerItem } from "./AnswerItem";
@@ -18,9 +19,23 @@ export const AttemptDetailsModal: React.FC<AttemptDetailsModalProps> = ({
   calculatePercentage,
   calculateDuration,
 }) => {
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+  useEffect(() => {
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, []);
+
+  return createPortal(
+    <div
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/10 backdrop-blur-[2px]"
+      onClick={onClose}
+    >
+      <div
+        className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-200"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="flex justify-between items-center p-6 border-b border-gray-200">
           <h2 className="text-2xl font-bold text-gray-900">
             Attempt Details - Quiz #{attempt.quizId}
@@ -82,6 +97,7 @@ export const AttemptDetailsModal: React.FC<AttemptDetailsModalProps> = ({
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };

@@ -35,21 +35,21 @@ const Navbar: React.FC = () => {
   ];
 
   return (
-    <nav className="bg-white shadow-lg border-b border-gray-100 fixed w-full z-50 backdrop-blur-sm bg-white/95">
+    <nav className="fixed inset-x-0 top-0 z-50 border-b border-slate-200/70 bg-white/85 backdrop-blur-xl shadow-[0_8px_30px_rgba(15,23,42,0.08)]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16 items-center">
+        <div className="flex h-[4.5rem] items-center justify-between">
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-3 group">
-            <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-2 rounded-xl group-hover:from-blue-600 group-hover:to-purple-700 transition-all duration-300 shadow-lg">
+          <Link to="/" className="group flex items-center space-x-3">
+            <div className="relative rounded-2xl bg-gradient-to-br from-blue-500 to-slate-700 p-2.5 shadow-lg shadow-slate-700/25 ring-1 ring-white/40 transition-all duration-300 group-hover:-translate-y-0.5 group-hover:shadow-xl">
               <FaTrophy className="text-white text-lg" />
             </div>
-            <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-blue-500 to-slate-700 bg-clip-text text-2xl font-bold tracking-tight text-transparent">
               KvizHub
             </span>
           </Link>
 
           {/* Desktop Menu */}
-          <div className="hidden md:flex space-x-1 items-center">
+          <div className="hidden items-center gap-2 md:flex">
             {/* Regular Navigation ONLY for Non-Admin Users */}
             {user &&
               user.role !== "Admin" &&
@@ -59,13 +59,13 @@ const Navbar: React.FC = () => {
                   to={item.path}
                   className={`flex items-center space-x-2 px-4 py-2 rounded-xl transition-all duration-200 group ${
                     isActiveRoute(item.path)
-                      ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-500/25"
-                      : "text-gray-600 hover:text-blue-600 hover:bg-blue-50 border border-transparent hover:border-blue-100"
+                      ? "bg-slate-900 text-white shadow-lg shadow-slate-900/20"
+                      : "border border-transparent text-slate-600 hover:border-slate-200 hover:bg-white/90 hover:text-slate-900"
                   }`}
                 >
                   <item.icon
                     className={`text-sm transition-transform group-hover:scale-110 ${
-                      isActiveRoute(item.path) ? "text-white" : "text-gray-400"
+                      isActiveRoute(item.path) ? "text-white" : "text-slate-400"
                     }`}
                   />
                   <span className="font-medium">{item.label}</span>
@@ -78,9 +78,17 @@ const Navbar: React.FC = () => {
                 {user.role === "Admin" && (
                   <Link
                     to="/admin"
-                    className="flex items-center space-x-2 px-4 py-2 rounded-xl bg-gradient-to-r from-purple-500 to-purple-600 text-white hover:from-purple-600 hover:to-purple-700 transition-all duration-200 shadow-lg shadow-purple-500/25 font-medium"
+                    className={`flex items-center space-x-2 px-4 py-2 rounded-xl transition-all duration-200 group ${
+                      isActiveRoute("/admin")
+                        ? "bg-slate-900 text-white shadow-lg shadow-slate-900/20"
+                        : "border border-transparent text-slate-600 hover:border-slate-200 hover:bg-white/90 hover:text-slate-900"
+                    }`}
                   >
-                    <FaCog className="text-sm" />
+                    <FaCog
+                      className={`text-sm transition-transform group-hover:scale-110 ${
+                        isActiveRoute("/admin") ? "text-white" : "text-slate-400"
+                      }`}
+                    />
                     <span>Admin Panel</span>
                   </Link>
                 )}
@@ -89,19 +97,19 @@ const Navbar: React.FC = () => {
                 <div className="relative ml-2">
                   <button
                     onClick={toggleProfile}
-                    className="flex items-center space-x-3 bg-gradient-to-r from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 px-4 py-2 rounded-xl border border-gray-200 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 group"
+                    className="flex items-center space-x-3 rounded-2xl border border-slate-200 bg-white/80 px-4 py-2.5 shadow-sm transition-all duration-200 hover:border-slate-300 hover:bg-white focus:outline-none focus:ring-2 focus:ring-blue-400/60"
                   >
                     <div className="flex items-center space-x-2">
                       <div className="relative">
                         <FaUserCircle
                           className={`text-xl transition-colors ${
                             user.role === "Admin"
-                              ? "text-purple-500"
+                              ? "text-slate-600"
                               : "text-blue-500"
                           }`}
                         />
                         {user.role === "Admin" && (
-                          <div className="absolute -top-1 -right-1 w-3 h-3 bg-purple-500 rounded-full border-2 border-white"></div>
+                          <div className="absolute -top-1 -right-1 w-3 h-3 bg-slate-500 rounded-full border-2 border-white"></div>
                         )}
                       </div>
                       <span className="font-medium text-gray-700">
@@ -112,7 +120,7 @@ const Navbar: React.FC = () => {
                       <span
                         className={`px-2.5 py-1 rounded-full text-xs font-semibold border ${
                           user.role === "Admin"
-                            ? "bg-purple-100 text-purple-700 border-purple-200"
+                            ? "bg-slate-100 text-slate-700 border-slate-200"
                             : "bg-blue-100 text-blue-700 border-blue-200"
                         }`}
                       >
@@ -127,7 +135,7 @@ const Navbar: React.FC = () => {
                   </button>
 
                   {profileOpen && (
-                    <div className="absolute right-0 mt-2 w-64 bg-white border border-gray-200 rounded-2xl shadow-xl py-3 z-10 backdrop-blur-sm bg-white/95">
+                    <div className="absolute right-0 z-10 mt-3 w-72 rounded-2xl border border-slate-200 bg-white/95 py-3 shadow-2xl shadow-slate-900/10 backdrop-blur-xl">
                       {/* User Info */}
                       <div className="px-4 py-3 border-b border-gray-100">
                         <p className="text-sm font-semibold text-gray-900">
@@ -139,7 +147,7 @@ const Navbar: React.FC = () => {
                         <span
                           className={`inline-block mt-2 px-2.5 py-1 rounded-full text-xs font-semibold border ${
                             user.role === "Admin"
-                              ? "bg-purple-100 text-purple-700 border-purple-200"
+                              ? "bg-slate-100 text-slate-700 border-slate-200"
                               : "bg-blue-100 text-blue-700 border-blue-200"
                           }`}
                         >
@@ -152,10 +160,10 @@ const Navbar: React.FC = () => {
                         <div className="py-2">
                           <Link
                             to="/my-results"
-                            className="flex items-center px-4 py-2.5 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-all duration-200 group"
+                            className="group flex items-center px-4 py-2.5 text-slate-700 transition-all duration-200 hover:bg-slate-50 hover:text-slate-900"
                             onClick={() => setProfileOpen(false)}
                           >
-                            <FaList className="mr-3 text-gray-400 group-hover:text-blue-500 transition-colors" />
+                            <FaList className="mr-3 text-slate-400 transition-colors group-hover:text-blue-500" />
                             <span>My Results</span>
                           </Link>
                         </div>
@@ -180,13 +188,13 @@ const Navbar: React.FC = () => {
               <div className="flex space-x-3 ml-4">
                 <Link
                   to="/login"
-                  className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-5 py-2.5 rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-200 font-medium shadow-lg hover:shadow-xl shadow-blue-500/25 hover:scale-105"
+                  className="btn-primary rounded-xl px-5 py-2.5 hover:scale-105"
                 >
                   Login
                 </Link>
                 <Link
                   to="/register"
-                  className="border-2 border-gray-300 text-gray-700 px-5 py-2.5 rounded-xl hover:border-blue-500 hover:text-blue-600 hover:shadow-lg transition-all duration-200 font-medium hover:scale-105"
+                  className="btn-secondary rounded-xl border-2 px-5 py-2.5 font-medium hover:border-blue-400 hover:scale-105 hover:text-blue-600 hover:shadow-lg"
                 >
                   Register
                 </Link>
@@ -198,12 +206,12 @@ const Navbar: React.FC = () => {
           <div className="md:hidden flex items-center">
             <button
               onClick={toggleMenu}
-              className="bg-gradient-to-r from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 p-2.5 rounded-xl border border-gray-200 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+              className="rounded-xl border border-slate-200 bg-white/80 p-2.5 shadow-sm transition-all duration-200 hover:border-slate-300 hover:bg-white focus:outline-none focus:ring-2 focus:ring-blue-400/60"
             >
               {menuOpen ? (
-                <FaTimes className="w-5 h-5 text-gray-600" />
+                <FaTimes className="h-5 w-5 text-slate-600" />
               ) : (
-                <FaBars className="w-5 h-5 text-gray-600" />
+                <FaBars className="h-5 w-5 text-slate-600" />
               )}
             </button>
           </div>
@@ -212,7 +220,7 @@ const Navbar: React.FC = () => {
 
       {/* Mobile Menu */}
       {menuOpen && (
-        <div className="md:hidden bg-white border-t border-gray-200 shadow-2xl backdrop-blur-sm bg-white/95">
+        <div className="border-t border-slate-200 bg-white/95 shadow-2xl backdrop-blur-xl md:hidden">
           <div className="px-4 pt-4 pb-6 space-y-2">
             {/* Regular Navigation ONLY for Non-Admin Users */}
             {user &&
@@ -221,10 +229,10 @@ const Navbar: React.FC = () => {
                 <Link
                   key={item.path}
                   to={item.path}
-                  className="flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-blue-50 hover:text-blue-600 transition-all duration-200 font-medium group"
+                  className="group flex items-center space-x-3 rounded-xl px-4 py-3 font-medium text-slate-700 transition-all duration-200 hover:bg-slate-50 hover:text-slate-900"
                   onClick={() => setMenuOpen(false)}
                 >
-                  <item.icon className="text-gray-400 group-hover:text-blue-500 transition-colors" />
+                  <item.icon className="text-slate-400 transition-colors group-hover:text-blue-500" />
                   <span>{item.label}</span>
                 </Link>
               ))}
@@ -235,10 +243,18 @@ const Navbar: React.FC = () => {
                 {user.role === "Admin" && (
                   <Link
                     to="/admin"
-                    className="flex items-center space-x-3 px-4 py-3 rounded-xl bg-purple-50 text-purple-600 font-semibold"
+                    className={`flex items-center space-x-3 rounded-xl px-4 py-3 font-semibold transition-all duration-200 ${
+                      isActiveRoute("/admin")
+                        ? "bg-slate-900 text-white"
+                        : "text-slate-700 hover:bg-slate-50 hover:text-slate-900"
+                    }`}
                     onClick={() => setMenuOpen(false)}
                   >
-                    <FaCog className="text-purple-500" />
+                    <FaCog
+                      className={
+                        isActiveRoute("/admin") ? "text-slate-200" : "text-slate-400"
+                      }
+                    />
                     <span>Admin Panel</span>
                   </Link>
                 )}
@@ -253,7 +269,7 @@ const Navbar: React.FC = () => {
                     <span
                       className={`inline-block mt-2 px-2.5 py-1 rounded-full text-xs font-semibold border ${
                         user.role === "Admin"
-                          ? "bg-purple-100 text-purple-700 border-purple-200"
+                          ? "bg-slate-100 text-slate-700 border-slate-200"
                           : "bg-blue-100 text-blue-700 border-blue-200"
                       }`}
                     >
@@ -275,14 +291,14 @@ const Navbar: React.FC = () => {
               <div className="border-t border-gray-200 pt-4 mt-2 space-y-3">
                 <Link
                   to="/login"
-                  className="block bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 py-3 rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-200 font-medium text-center shadow-lg shadow-blue-500/25"
+                  className="btn-primary block rounded-xl px-4 py-3 text-center"
                   onClick={() => setMenuOpen(false)}
                 >
                   Login
                 </Link>
                 <Link
                   to="/register"
-                  className="block border-2 border-gray-300 text-gray-700 px-4 py-3 rounded-xl hover:border-blue-500 hover:text-blue-600 transition-all duration-200 font-medium text-center"
+                  className="btn-secondary block rounded-xl border-2 px-4 py-3 text-center font-medium hover:border-blue-400 hover:text-blue-600"
                   onClick={() => setMenuOpen(false)}
                 >
                   Register

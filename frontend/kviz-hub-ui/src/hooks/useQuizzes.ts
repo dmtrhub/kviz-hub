@@ -1,26 +1,37 @@
 import { useState, useEffect } from 'react';
-import axiosInstance from '../api/axios';
-import type { Quiz } from '../models/Quiz';
+import { quizApi } from '../api/quizApi';
+import type { Quiz, QuizQueryParams, QuizzesPagination } from '../models/Quiz';
+import { useAsyncStatus } from './useAsyncStatus';
 
-export const useQuizzes = () => {
+const DEFAULT_PAGINATION: QuizzesPagination = {
+  totalCount: 0,
+  page: 1,
+  pageSize: 9,
+  totalPages: 1
+};
+
+export const useQuizzes = (params: QuizQueryParams) => {
   const [quizzes, setQuizzes] = useState<Quiz[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [pagination, setPagination] = useState<QuizzesPagination>(DEFAULT_PAGINATION);
+  const { loading, error, execute } = useAsyncStatus({ initialLoading: true });
 
   const fetchQuizzes = async () => {
-    try {
-      setLoading(true);
-      const response = await axiosInstance.get<Quiz[]>('/quizzes');
-      setQuizzes(response.data);
-    } catch (error) {
-      console.error('Error fetching quizzes:', error);
-    } finally {
-      setLoading(false);
+    const response = await execute(() => quizApi.getPagedQuizzes(params), {
+      errorMessage: 'Failed to fetch quizzes',
+    });
+
+    if (response) {
+      setQuizzes(response.items);
+      setPagination(response.pagination);
+    } else {
+      setQuizzes([]);
+      setPagination(DEFAULT_PAGINATION);
     }
   };
 
   useEffect(() => {
     fetchQuizzes();
-  }, []);
+  }, [params.keyword, params.categoryId, params.difficulty, params.page, params.pageSize]);
 
-  return { quizzes, loading, fetchQuizzes };
+  return { quizzes, pagination, loading, error, fetchQuizzes };
 };

@@ -1,3 +1,54 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@600;700;800&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+	:root {
+		color-scheme: light;
+	}
+
+	body {
+		@apply antialiased text-slate-800;
+		font-family: 'Manrope', 'Segoe UI', sans-serif;
+		background:
+			radial-gradient(circle at 10% -10%, rgba(2, 132, 199, 0.11), transparent 42%),
+			radial-gradient(circle at 90% 0%, rgba(15, 23, 42, 0.08), transparent 38%),
+			linear-gradient(135deg, #f8fafc 0%, #f1f5f9 52%, #e2e8f0 100%);
+	}
+
+	h1,
+	h2,
+	h3,
+	h4 {
+		font-family: 'Sora', 'Manrope', sans-serif;
+		letter-spacing: -0.01em;
+	}
+}
+
+@layer components {
+	.page-shell {
+		@apply min-h-screen bg-gradient-to-br from-sky-50 via-blue-50 to-slate-100 pt-20 pb-8;
+	}
+
+	.page-shell-quiz {
+		@apply min-h-screen bg-gradient-to-br from-sky-50 via-blue-50 to-slate-100 pt-24 pb-8;
+	}
+
+	.surface-card {
+		@apply bg-white/90 border border-slate-200/70 backdrop-blur-sm shadow-sm;
+	}
+
+	.btn-primary {
+		@apply bg-gradient-to-r from-blue-500 to-slate-700 text-white font-semibold transition-all duration-300 shadow-lg hover:from-blue-600 hover:to-slate-800 hover:shadow-xl;
+	}
+
+	.btn-secondary {
+		@apply bg-white text-slate-700 border border-slate-300 transition-all duration-200 hover:bg-slate-50;
+	}
+
+	.btn-danger {
+		@apply bg-gradient-to-r from-red-600 to-orange-600 text-white font-semibold transition-all duration-300 shadow-lg hover:from-red-700 hover:to-orange-700 hover:shadow-xl;
+	}
+}

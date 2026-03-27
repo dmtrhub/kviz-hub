@@ -49,7 +49,7 @@ export const AdminResults: React.FC = () => {
     if (percentage >= 60)
       return "bg-gradient-to-r from-yellow-500 to-amber-600";
     if (percentage >= 40) return "bg-gradient-to-r from-orange-500 to-red-600";
-    return "bg-gradient-to-r from-red-500 to-pink-600";
+    return "bg-gradient-to-r from-red-500 to-orange-500";
   };
 
   const getStatusColor = (finished: boolean): string => {
@@ -69,12 +69,10 @@ export const AdminResults: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 p-6">
-        <div className="flex justify-center items-center py-20">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-600 text-lg">Loading results...</p>
-          </div>
+      <div className="py-16 text-center">
+        <div className="inline-block">
+          <div className="animate-spin rounded-full h-12 w-12 border-2 border-slate-300 border-t-slate-900 mb-4"></div>
+          <p className="text-slate-600">Loading results...</p>
         </div>
       </div>
     );
@@ -82,39 +80,32 @@ export const AdminResults: React.FC = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 p-6">
-        <div className="max-w-6xl mx-auto">
-          <div className="bg-red-50 border border-red-200 rounded-2xl p-6 shadow-sm">
-            <div className="flex items-center mb-4">
-              <div className="bg-red-100 p-3 rounded-xl">
-                <FaTimes className="h-6 w-6 text-red-600" />
-              </div>
-              <h3 className="text-lg font-semibold text-red-800 ml-3">
-                Error Loading Results
-              </h3>
-            </div>
-            <p className="text-red-700">{error}</p>
-            <button
-              onClick={fetchAllAttempts}
-              className="mt-4 bg-red-600 text-white px-6 py-3 rounded-xl hover:bg-red-700 transition-colors font-medium"
-            >
-              Try Again
-            </button>
-          </div>
+      <div className="py-8">
+        <div className="surface-card rounded-2xl p-6 border-l-4 border-red-500">
+          <h3 className="text-lg font-semibold text-red-900 mb-2">
+            Error Loading Results
+          </h3>
+          <p className="text-red-700 mb-4">{error}</p>
+          <button
+            onClick={fetchAllAttempts}
+            className="bg-red-600 text-white px-6 py-3 rounded-xl hover:bg-red-700 transition-colors font-medium"
+          >
+            Try Again
+          </button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 p-6">
-      <div className="max-w-7xl mx-auto">
+    <div>
+      <div>
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-2">
+          <h2 className="text-3xl font-bold text-slate-900 mb-2">
             Quiz Results
-          </h1>
-          <p className="text-gray-600 text-lg">
+          </h2>
+          <p className="text-slate-600">
             View and analyze all user attempts
           </p>
         </div>
@@ -127,69 +118,63 @@ export const AdminResults: React.FC = () => {
         />
 
         {/* Search */}
-        <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200 mb-8">
-          <div className="flex items-center mb-4">
-            <FaSearch className="text-gray-400 mr-2" />
-            <h3 className="text-lg font-semibold text-gray-900">
-              Search Results
-            </h3>
-          </div>
+        <div className="surface-card rounded-2xl p-6 mb-8">
           <div className="relative">
-            <FaSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            <FaSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400" />
             <input
               type="text"
               placeholder="Search by user ID..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-12 pr-4 py-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-lg"
+              className="w-full pl-11 pr-4 py-3 border border-slate-300 rounded-xl bg-slate-50 text-slate-800 placeholder-slate-400 transition-all focus:bg-white focus:ring-2 focus:ring-blue-400 focus:border-transparent"
             />
           </div>
         </div>
 
         {/* Results Grid */}
-        <div className="grid gap-6">
-          {filteredAttempts.length === 0 ? (
-            <div className="col-span-full text-center py-16 bg-white rounded-2xl shadow-lg border border-gray-200">
-              <div className="text-gray-400 text-8xl mb-6">📊</div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-3">
-                {attempts.length === 0
-                  ? "No attempts recorded yet"
-                  : "No attempts found"}
-              </h3>
-              <p className="text-gray-600 text-lg mb-8 max-w-md mx-auto">
-                {attempts.length === 0
-                  ? "Quiz attempts will appear here once users start taking quizzes."
-                  : "Try adjusting your search terms to find what you're looking for."}
-              </p>
+        {filteredAttempts.length === 0 ? (
+          <div className="col-span-full text-center py-20 surface-card rounded-2xl">
+            <div className="bg-blue-100 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6">
+              <FaSearch className="text-3xl text-blue-600" />
             </div>
-          ) : (
-            filteredAttempts.map((attempt) => (
-              <AttemptCard
-                key={attempt.id}
-                attempt={attempt}
-                onViewDetails={setSelectedAttempt}
-                formatUserId={formatUserId}
-                calculatePercentage={calculatePercentage}
-                calculateDuration={calculateDuration}
-                getScoreColor={getScoreColor}
-                getScoreBgColor={getScoreBgColor}
-                getStatusColor={getStatusColor}
-              />
-            ))
-          )}
-        </div>
-
-        {/* Modal */}
-        {selectedAttempt && (
-          <AttemptDetailsModal
-            attempt={selectedAttempt}
-            onClose={() => setSelectedAttempt(null)}
-            formatUserId={formatUserId}
-            calculatePercentage={calculatePercentage}
-            calculateDuration={calculateDuration}
-          />
+            <h3 className="text-2xl font-bold text-slate-900 mb-3">
+              {attempts.length === 0
+                ? "No attempts recorded yet"
+                : "No attempts found"}
+            </h3>
+            <p className="text-slate-600 mb-8 max-w-md mx-auto">
+              {attempts.length === 0
+                ? "Quiz attempts will appear here once users start taking quizzes."
+                : "Try adjusting your search terms to find what you're looking for."}
+            </p>
+          </div>
+        ) : (
+          filteredAttempts.map((attempt) => (
+            <AttemptCard
+              key={attempt.id}
+              attempt={attempt}
+              onViewDetails={setSelectedAttempt}
+              formatUserId={formatUserId}
+              calculatePercentage={calculatePercentage}
+              calculateDuration={calculateDuration}
+              getScoreColor={getScoreColor}
+              getScoreBgColor={getScoreBgColor}
+              getStatusColor={getStatusColor}
+            />
+          ))
         )}
       </div>
+
+      {/* Modal */}
+      {selectedAttempt && (
+        <AttemptDetailsModal
+          attempt={selectedAttempt}
+          onClose={() => setSelectedAttempt(null)}
+          formatUserId={formatUserId}
+          calculatePercentage={calculatePercentage}
+          calculateDuration={calculateDuration}
+        />
+      )}
     </div>
   );
 };

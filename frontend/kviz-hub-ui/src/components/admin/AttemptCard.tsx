@@ -27,7 +27,7 @@ export const AttemptCard: React.FC<AttemptCardProps> = ({
   const duration = calculateDuration(attempt);
 
   return (
-    <div className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 border border-gray-100">
+    <div className="surface-card rounded-2xl p-6 hover:shadow-xl transition-all duration-300">
       <div className="flex justify-between items-start mb-4">
         <div className="flex-1">
           <div className="flex items-center space-x-3 mb-3">

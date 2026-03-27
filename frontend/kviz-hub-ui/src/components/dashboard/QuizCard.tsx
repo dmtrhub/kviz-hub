@@ -22,7 +22,7 @@ const QuizCard: React.FC<QuizCardProps> = ({ quiz, onStartQuiz }) => {
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 flex flex-col">
+    <div className="surface-card rounded-xl p-6 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 flex flex-col">
       <h2 className="text-xl font-bold text-gray-900 mb-3">{quiz.title}</h2>
       <p className="text-gray-600 mb-4 flex-grow">{quiz.description}</p>
 
@@ -60,7 +60,7 @@ const QuizCard: React.FC<QuizCardProps> = ({ quiz, onStartQuiz }) => {
 
       <button
         onClick={onStartQuiz}
-        className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 rounded-lg hover:from-blue-700 hover:to-purple-700 transition font-medium shadow-lg mt-auto"
+        className="w-full btn-primary py-3 rounded-lg mt-auto"
       >
         Start Quiz
       </button>

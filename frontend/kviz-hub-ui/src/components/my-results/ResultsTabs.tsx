@@ -7,7 +7,7 @@ interface ResultsTabsProps {
 
 const ResultsTabs: React.FC<ResultsTabsProps> = ({ activeTab, onTabChange }) => {
   return (
-    <div className="bg-white rounded-2xl shadow-sm p-6 mb-8 border border-gray-200">
+    <div className="surface-card rounded-2xl p-6 mb-8">
       <div className="flex border-b border-gray-200">
         <button
           onClick={() => onTabChange("results")}

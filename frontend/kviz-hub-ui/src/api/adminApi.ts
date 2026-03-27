@@ -47,31 +47,8 @@ export const adminApi = {
   deleteQuestion: (id: number): Promise<void> => 
     axiosInstance.delete(`/questions/${id}`),
 
-  getAllQuizAttempts: (): Promise<QuizAttemptResponse[]> => {
-    // PROVERI TOKEN
-    const token = localStorage.getItem('token');
-    if (token) {
-      try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        console.log('🔐 Token payload:', payload);
-        console.log('🎭 User role from token:', payload.role);
-        console.log('📧 User email from token:', payload.email);
-      } catch (e) {
-        console.error('❌ Error parsing token:', e);
-      }
-    } else {
-      console.warn('⚠️ No token found');
-    }
-    
-    return axiosInstance.get('/admin/quiz-attempts')
-      .then(res => res.data)
-      .catch(error => {
-        console.error('❌ GET /admin/quiz-attempts failed:', error);
-        console.error('Status:', error.response?.status);
-        console.error('Headers:', error.response?.headers);
-        throw error;
-      });
-  },
+  getAllQuizAttempts: (): Promise<QuizAttemptResponse[]> =>
+    axiosInstance.get('/admin/quiz-attempts').then(res => res.data),
     
   getQuizAttemptsByQuiz: (quizId: number): Promise<QuizAttemptResponse[]> => 
     axiosInstance.get(`/admin/quizzes/${quizId}/attempts`).then(res => res.data),

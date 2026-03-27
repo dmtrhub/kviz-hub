@@ -8,9 +8,9 @@ interface ErrorScreenProps {
 
 const ErrorScreen: React.FC<ErrorScreenProps> = ({ message, onRetry, buttonText }) => {
   return React.createElement('div', {
-    className: "min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 pt-20 flex items-center justify-center"
+    className: "page-shell flex items-center justify-center"
   },
-    React.createElement('div', { className: "bg-white rounded-xl shadow-lg p-8 max-w-md mx-4 text-center" },
+    React.createElement('div', { className: "surface-card rounded-xl p-8 max-w-md mx-4 text-center" },
       React.createElement('div', { className: "text-red-500 text-4xl mx-auto mb-4" }, "❌"),
       React.createElement('h2', { className: "text-xl font-semibold text-gray-800 mb-2" }, "Error"),
       React.createElement('p', { className: "text-gray-600 mb-6" }, message),

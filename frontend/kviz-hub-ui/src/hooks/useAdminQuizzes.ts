@@ -2,35 +2,34 @@ import { useState, useEffect } from 'react';
 import { quizService } from '../services/QuizService';
 import type { Quiz } from '../models/Quiz';
 import type { Category } from '../models/Category';
+import { useAsyncStatus } from './useAsyncStatus';
 
 export const useAdminQuizzes = () => {
   const [quizzes, setQuizzes] = useState<Quiz[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { loading, error, execute } = useAsyncStatus({ initialLoading: true });
 
   const fetchQuizzes = async () => {
-    try {
-      setLoading(true);
-      setError(null);
+    const data = await execute(
+      async () => {
+        const [quizData, categoryData] = await Promise.all([
+          quizService.adminGetAllQuizzes(),
+          quizService.adminGetAllCategories(),
+        ]);
 
-      if (typeof quizService.adminGetAllQuizzes !== 'function') {
-        throw new Error('adminGetAllQuizzes method does not exist on quizService');
+        return {
+          quizData,
+          categoryData,
+        };
+      },
+      {
+        errorMessage: 'Failed to fetch quizzes or categories',
       }
+    );
 
-      const data = await quizService.adminGetAllQuizzes();
-      setQuizzes(data);
-
-      // fetch categories
-      if (typeof quizService.adminGetAllCategories === 'function') {
-        const catData = await quizService.adminGetAllCategories();
-        setCategories(catData);
-      }
-    } catch (err) {
-      setError('Failed to fetch quizzes or categories');
-      console.error('Error fetching quizzes/categories:', err);
-    } finally {
-      setLoading(false);
+    if (data) {
+      setQuizzes(data.quizData);
+      setCategories(data.categoryData);
     }
   };
 

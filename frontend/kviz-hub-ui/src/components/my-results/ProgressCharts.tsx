@@ -10,7 +10,7 @@ interface ProgressChartsProps {
 const ProgressCharts: React.FC<ProgressChartsProps> = ({ progress }) => {
   if (progress.length === 0) {
     return (
-      <div className="bg-white rounded-2xl shadow-sm p-12 text-center border border-gray-200">
+      <div className="surface-card rounded-2xl p-12 text-center">
         <FaChartLine className="text-gray-300 text-4xl mx-auto mb-4" />
         <h3 className="text-xl font-semibold text-gray-900 mb-2">No progress data</h3>
         <p className="text-gray-600 mb-6">

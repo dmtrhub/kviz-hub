@@ -1,0 +1,15 @@
+FROM node:22.17.0-alpine
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+RUN npm ci
+
+# Copy source code (will be overridden by volume mount in docker-compose during dev)
+COPY . .
+
+# Expose Vite dev server port
+EXPOSE 5173
+
+# Run dev server with HMR (Hot Module Replacement)
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]

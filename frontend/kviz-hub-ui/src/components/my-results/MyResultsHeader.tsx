@@ -7,10 +7,10 @@ interface MyResultsHeaderProps {
 
 const MyResultsHeader: React.FC<MyResultsHeaderProps> = ({ onBackToQuizzes }) => {
   return (
-    <div className="bg-white rounded-2xl shadow-sm p-8 mb-8 border border-gray-200">
+    <div className="surface-card rounded-2xl p-8 mb-8">
       <div className="flex flex-col lg:flex-row justify-between items-center gap-6">
         <div className="flex items-center space-x-4">
-          <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-3 rounded-xl shadow-sm">
+          <div className="bg-gradient-to-r from-blue-500 to-slate-700 p-3 rounded-xl shadow-sm">
             <FaChartLine className="text-white text-2xl" />
           </div>
           <div>

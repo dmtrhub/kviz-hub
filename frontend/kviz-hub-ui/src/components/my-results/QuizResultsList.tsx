@@ -14,7 +14,7 @@ const QuizResultsList: React.FC<QuizResultsListProps> = ({
 }) => {
   if (results.length === 0) {
     return (
-      <div className="bg-white rounded-2xl shadow-sm p-12 text-center border border-gray-200">
+      <div className="surface-card rounded-2xl p-12 text-center">
         <FaClipboardList className="text-gray-300 text-4xl mx-auto mb-4" />
         <h3 className="text-xl font-semibold text-gray-900 mb-2">No results yet</h3>
         <p className="text-gray-600 mb-6">

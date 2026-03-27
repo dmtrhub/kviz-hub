@@ -29,7 +29,7 @@ const LeaderboardTable: React.FC<LeaderboardTableProps> = ({ entries, currentUse
 
   if (entries.length === 0) {
     return (
-      <div className="bg-white rounded-2xl shadow-sm p-12 text-center border border-gray-200">
+      <div className="surface-card rounded-2xl p-12 text-center">
         <FaTrophy className="text-gray-300 text-4xl mx-auto mb-4" />
         <h3 className="text-xl font-semibold text-gray-900 mb-2">No Leaderboard Data</h3>
         <p className="text-gray-600">
@@ -40,7 +40,7 @@ const LeaderboardTable: React.FC<LeaderboardTableProps> = ({ entries, currentUse
   }
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-200">
+    <div className="surface-card rounded-2xl overflow-hidden">
       <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
         <h3 className="text-lg font-semibold text-gray-900">
           Leaderboard • {entries.length} {entries.length === 1 ? 'player' : 'players'}
