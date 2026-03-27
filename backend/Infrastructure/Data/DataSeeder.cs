@@ -168,11 +168,11 @@ public class DataSeeder(ApplicationDbContext context, ILogger<DataSeeder> logger
     {
         return
         [
-            new Category { Name = "Istorija", Description = "Dogadjaji, licnosti i periodi iz svetske i srpske istorije." },
-            new Category { Name = "Geografija", Description = "Prestonice, reljef, klima i geografski pojmovi." },
-            new Category { Name = "Nauka", Description = "Fizika, hemija, biologija i astronomija." },
-            new Category { Name = "Tehnologija", Description = "Racunari, internet, mreze i programiranje." },
-            new Category { Name = "Sport", Description = "Pravila, takmicenja i istorija sporta." }
+            new Category { Name = "History", Description = "Events, people, and periods from world and Serbian history." },
+            new Category { Name = "Geography", Description = "Capitals, landforms, climate, and geographic concepts." },
+            new Category { Name = "Science", Description = "Physics, chemistry, biology, and astronomy." },
+            new Category { Name = "Technology", Description = "Computers, internet, networks, and programming." },
+            new Category { Name = "Sports", Description = "Rules, competitions, and sports history." }
         ];
     }
 
@@ -181,176 +181,176 @@ public class DataSeeder(ApplicationDbContext context, ILogger<DataSeeder> logger
         return
         [
             Quiz(
-                categoryName: "Istorija",
-                title: "Anticka civilizacija",
-                description: "Osnovna pitanja o staroj Grckoj i Rimu.",
+                categoryName: "History",
+                title: "Ancient Civilization",
+                description: "Basic questions about Ancient Greece and Rome.",
                 difficulty: Difficulty.Easy,
                 timeLimit: 8,
                 questions:
                 [
-                    SingleChoice("U kom gradu se nalazi Koloseum?", "Rim", "Atina", "Kartagina", "Milano"),
-                    TrueFalse("Iliada je ep koji se tradicionalno pripisuje Homeru.", true),
-                    FillInBlank("Kako se zove grad-drzava poznat po vojnom vaspitanju u staroj Grckoj?", "Sparta")
+                    SingleChoice("In which city is the Colosseum located?", "Rome", "Athens", "Carthage", "Milan"),
+                    TrueFalse("The Iliad is an epic traditionally attributed to Homer.", true),
+                    FillInBlank("Which city-state was known for military training in Ancient Greece?", "Sparta")
                 ]),
             Quiz(
-                categoryName: "Istorija",
-                title: "Srednji vek Evrope",
-                description: "Klucni dogadjaji i licnosti srednjeg veka.",
+                categoryName: "History",
+                title: "Medieval Europe",
+                description: "Key events and figures of the Middle Ages.",
                 difficulty: Difficulty.Medium,
                 timeLimit: 9,
                 questions:
                 [
-                    SingleChoice("Bitka kod Hastingsa odigrala se koje godine?", "1066", "1215", "1099", "1453"),
-                    TrueFalse("Naziv 'Crna smrt' koristi se za pandemiju kuge u 14. veku.", true),
+                    SingleChoice("In which year did the Battle of Hastings take place?", "1066", "1215", "1099", "1453"),
+                    TrueFalse("The term 'Black Death' is used for the 14th-century plague pandemic.", true),
                     MultipleChoice(
-                        "Koje posledice se vezuju za krstaske ratove?",
-                        "Razvoj trgovine izmedju Evrope i Istoka",
-                        "Jacanje kulturne razmene",
-                        "Ukidanje papstva",
-                        "Pad Carigrada 1204. pod Osmanlije"
+                        "Which outcomes are associated with the Crusades?",
+                        "Growth of trade between Europe and the East",
+                        "Stronger cultural exchange",
+                        "Abolition of the papacy",
+                        "Fall of Constantinople in 1204 to the Ottomans"
                     )
                 ]),
             Quiz(
-                categoryName: "Istorija",
-                title: "Istorija Srbije 19. veka",
-                description: "Ustanci, reforme i medjunarodno priznanje Srbije.",
+                categoryName: "History",
+                title: "19th Century Serbian History",
+                description: "Uprisings, reforms, and international recognition of Serbia.",
                 difficulty: Difficulty.Medium,
                 timeLimit: 9,
                 questions:
                 [
-                    SingleChoice("Prvi srpski ustanak podignut je koje godine?", "1804", "1815", "1830", "1878"),
-                    SingleChoice("Sretenjski ustav donet je koje godine?", "1835", "1829", "1848", "1867"),
-                    SingleChoice("Na kom kongresu je Srbija medjunarodno priznata kao nezavisna?", "Berlinski kongres", "Becki kongres", "Pariska konferencija", "Jaltanska konferencija")
+                    SingleChoice("In which year did the First Serbian Uprising begin?", "1804", "1815", "1830", "1878"),
+                    SingleChoice("In which year was the Sretenje Constitution adopted?", "1835", "1829", "1848", "1867"),
+                    SingleChoice("At which congress was Serbia internationally recognized as independent?", "Congress of Berlin", "Congress of Vienna", "Paris Peace Conference", "Yalta Conference")
                 ]),
             Quiz(
-                categoryName: "Istorija",
-                title: "Drugi svetski rat",
-                description: "Najvazniji datumi i cinjenice Drugog svetskog rata.",
+                categoryName: "History",
+                title: "World War II",
+                description: "Key dates and facts of World War II.",
                 difficulty: Difficulty.Hard,
                 timeLimit: 10,
                 questions:
                 [
-                    SingleChoice("Napadom na koju drzavu je poceo Drugi svetski rat u Evropi?", "Poljsku", "Francusku", "Belgiju", "Norvesku"),
-                    SingleChoice("Dan D desio se koje godine?", "1944", "1942", "1940", "1945"),
-                    SingleChoice("Ujedinjene nacije osnovane su koje godine?", "1945", "1943", "1946", "1950")
+                    SingleChoice("The invasion of which country started World War II in Europe?", "Poland", "France", "Belgium", "Norway"),
+                    SingleChoice("In which year did D-Day happen?", "1944", "1942", "1940", "1945"),
+                    SingleChoice("In which year were the United Nations founded?", "1945", "1943", "1946", "1950")
                 ]),
 
             Quiz(
-                categoryName: "Geografija",
-                title: "Prestonice sveta",
-                description: "Prestonice drzava sa razlicitih kontinenata.",
+                categoryName: "Geography",
+                title: "World Capitals",
+                description: "Capitals of countries from different continents.",
                 difficulty: Difficulty.Easy,
                 timeLimit: 8,
                 questions:
                 [
-                    SingleChoice("Koji je glavni grad Australije?", "Canberra", "Sydney", "Melbourne", "Perth"),
-                    SingleChoice("Koji je glavni grad Kanade?", "Ottawa", "Toronto", "Vancouver", "Montreal"),
-                    SingleChoice("Koji je glavni grad Brazila?", "Brasilia", "Rio de Janeiro", "Sao Paulo", "Salvador")
+                    SingleChoice("What is the capital of Australia?", "Canberra", "Sydney", "Melbourne", "Perth"),
+                    SingleChoice("What is the capital of Canada?", "Ottawa", "Toronto", "Vancouver", "Montreal"),
+                    SingleChoice("What is the capital of Brazil?", "Brasilia", "Rio de Janeiro", "Sao Paulo", "Salvador")
                 ]),
             Quiz(
-                categoryName: "Geografija",
-                title: "Reke i jezera Evrope",
-                description: "Najpoznatije evropske reke i jezera.",
+                categoryName: "Geography",
+                title: "Rivers and Lakes of Europe",
+                description: "The most famous European rivers and lakes.",
                 difficulty: Difficulty.Medium,
                 timeLimit: 9,
                 questions:
                 [
-                    SingleChoice("U koje more se uliva Dunav?", "Crno more", "Jadransko more", "Severno more", "Egejsko more"),
-                    TrueFalse("Volga je najduza reka u Evropi.", true),
+                    SingleChoice("Into which sea does the Danube flow?", "Black Sea", "Adriatic Sea", "North Sea", "Aegean Sea"),
+                    TrueFalse("The Volga is the longest river in Europe.", true),
                     MultipleChoice(
-                        "Koje reke proticu kroz Srbiju?",
-                        "Dunav",
+                        "Which rivers flow through Serbia?",
+                        "Danube",
                         "Sava",
-                        "Temza",
+                        "Thames",
                         "Volta"
                     )
                 ]),
             Quiz(
-                categoryName: "Geografija",
-                title: "Planine i vrhovi sveta",
-                description: "Najvisi vrhovi i planinski lanci.",
+                categoryName: "Geography",
+                title: "World Mountains and Peaks",
+                description: "The highest peaks and mountain ranges.",
                 difficulty: Difficulty.Medium,
                 timeLimit: 9,
                 questions:
                 [
-                    SingleChoice("Koji je najvisi vrh sveta?", "Everest", "K2", "Kangchendzonga", "Lhotse"),
-                    SingleChoice("U kom planinskom lancu se nalazi Aconcagua?", "Andi", "Alpi", "Himalaji", "Karpati"),
-                    SingleChoice("Mont Blanc pripada kom planinskom lancu?", "Alpi", "Pirineji", "Apenini", "Dinaridi")
+                    SingleChoice("What is the highest peak in the world?", "Everest", "K2", "Kangchenjunga", "Lhotse"),
+                    SingleChoice("Aconcagua belongs to which mountain range?", "Andes", "Alps", "Himalayas", "Carpathians"),
+                    SingleChoice("Mont Blanc belongs to which mountain range?", "Alps", "Pyrenees", "Apennines", "Dinaric Alps")
                 ]),
             Quiz(
-                categoryName: "Geografija",
-                title: "Klimatske zone i biomi",
-                description: "Povezivanje klime i prirodnih zona.",
+                categoryName: "Geography",
+                title: "Climate Zones and Biomes",
+                description: "Connecting climate types with natural zones.",
                 difficulty: Difficulty.Hard,
                 timeLimit: 10,
                 questions:
                 [
-                    SingleChoice("Sahara se nalazi pretezno u kom klimatskom pojasu?", "Subtropskom suvom", "Umerenom okeanskom", "Subpolarnom", "Ekvatorskom"),
-                    SingleChoice("Koji biom dominira severom Kanade i Sibira?", "Tajga", "Savana", "Tundra", "Prasuma"),
-                    SingleChoice("Mediteransku klimu karakterisu:", "Vruca suva leta i blage kise zime", "Hladna suva leta i duge zime", "Ravnomerne padavine tokom cele godine", "Ekstremno hladne zime i vrlo kratka leta")
+                    SingleChoice("Sahara is mostly located in which climate zone?", "Subtropical arid", "Temperate oceanic", "Subpolar", "Equatorial"),
+                    SingleChoice("Which biome dominates northern Canada and Siberia?", "Taiga", "Savanna", "Tundra", "Rainforest"),
+                    SingleChoice("Mediterranean climate is characterized by:", "Hot dry summers and mild rainy winters", "Cold dry summers and long winters", "Even precipitation all year", "Extremely cold winters and very short summers")
                 ]),
 
             Quiz(
-                categoryName: "Nauka",
-                title: "Osnovi fizike",
-                description: "Fundamentalni pojmovi mehanike i elektriciteta.",
+                categoryName: "Science",
+                title: "Physics Basics",
+                description: "Fundamental concepts of mechanics and electricity.",
                 difficulty: Difficulty.Easy,
                 timeLimit: 8,
                 questions:
                 [
-                    SingleChoice("Koja je SI jedinica za silu?", "Njutn", "Dzoul", "Vat", "Paskal"),
-                    TrueFalse("Brzina svetlosti u vakuumu je priblizno 300000 km/s.", true),
-                    FillInBlank("Kako glasi oznaka jedinice za elektricni otpor u SI sistemu?", "om")
+                    SingleChoice("What is the SI unit of force?", "Newton", "Joule", "Watt", "Pascal"),
+                    TrueFalse("The speed of light in vacuum is approximately 300,000 km/s.", true),
+                    FillInBlank("What is the name of the SI unit for electrical resistance?", "ohm")
                 ]),
             Quiz(
-                categoryName: "Nauka",
-                title: "Osnovi hemije",
-                description: "Atomi, jedinjenja i osnovni hemijski pojmovi.",
+                categoryName: "Science",
+                title: "Chemistry Basics",
+                description: "Atoms, compounds, and basic chemical concepts.",
                 difficulty: Difficulty.Easy,
                 timeLimit: 8,
                 questions:
                 [
-                    SingleChoice("Hemijska formula vode je:", "H2O", "CO2", "O2", "NaCl"),
-                    SingleChoice("Atomski broj kiseonika je:", "8", "6", "10", "16"),
-                    SingleChoice("Rastvor sa pH vrednoscu manjom od 7 je:", "Kiseo", "Bazan", "Neutralan", "Pufer")
+                    SingleChoice("The chemical formula of water is:", "H2O", "CO2", "O2", "NaCl"),
+                    SingleChoice("The atomic number of oxygen is:", "8", "6", "10", "16"),
+                    SingleChoice("A solution with pH less than 7 is:", "Acidic", "Basic", "Neutral", "Buffer")
                 ]),
             Quiz(
-                categoryName: "Nauka",
-                title: "Ljudsko telo",
-                description: "Anatomija i funkcije osnovnih organa.",
+                categoryName: "Science",
+                title: "Human Body",
+                description: "Anatomy and functions of major organs.",
                 difficulty: Difficulty.Medium,
                 timeLimit: 9,
                 questions:
                 [
-                    SingleChoice("Najveci organ ljudskog tela je:", "Koza", "Jetra", "Pluca", "Mozak"),
-                    SingleChoice("Koji organ pumpa krv kroz telo?", "Srce", "Bubreg", "Pankreas", "Slezina"),
-                    SingleChoice("Insulin proizvodi:", "Pankreas", "Stitasta zlezda", "Jetra", "Hipofiza")
+                    SingleChoice("The largest organ of the human body is:", "Skin", "Liver", "Lungs", "Brain"),
+                    SingleChoice("Which organ pumps blood through the body?", "Heart", "Kidney", "Pancreas", "Spleen"),
+                    SingleChoice("Insulin is produced by:", "Pancreas", "Thyroid gland", "Liver", "Pituitary gland")
                 ]),
             Quiz(
-                categoryName: "Nauka",
-                title: "Astronomija Suncevog sistema",
-                description: "Planete i osobine naseg planetarnog sistema.",
+                categoryName: "Science",
+                title: "Solar System Astronomy",
+                description: "Planets and properties of our planetary system.",
                 difficulty: Difficulty.Medium,
                 timeLimit: 9,
                 questions:
                 [
-                    SingleChoice("Koja je najveca planeta Suncevog sistema?", "Jupiter", "Saturn", "Neptun", "Zemlja"),
-                    SingleChoice("Koja planeta je poznata kao Crvena planeta?", "Mars", "Venera", "Merkur", "Uran"),
-                    SingleChoice("Koja planeta ima najizrazenije prstenove?", "Saturn", "Jupiter", "Mars", "Venera")
+                    SingleChoice("What is the largest planet in the Solar System?", "Jupiter", "Saturn", "Neptune", "Earth"),
+                    SingleChoice("Which planet is known as the Red Planet?", "Mars", "Venus", "Mercury", "Uranus"),
+                    SingleChoice("Which planet has the most prominent rings?", "Saturn", "Jupiter", "Mars", "Venus")
                 ]),
 
             Quiz(
-                categoryName: "Tehnologija",
-                title: "Racunarske mreze",
-                description: "Osnovni pojmovi umrezavanja i protokola.",
+                categoryName: "Technology",
+                title: "Computer Networks",
+                description: "Core networking and protocol concepts.",
                 difficulty: Difficulty.Medium,
                 timeLimit: 9,
                 questions:
                 [
-                    SingleChoice("Koji uredjaj povezuje razlicite mreze i usmerava saobracaj?", "Ruter", "Svic", "Repeater", "Modem"),
-                    TrueFalse("Podrazumevani port za HTTPS je 443.", true),
+                    SingleChoice("Which device connects different networks and routes traffic?", "Router", "Switch", "Repeater", "Modem"),
+                    TrueFalse("The default port for HTTPS is 443.", true),
                     MultipleChoice(
-                        "Koji protokoli pripadaju aplikacionom sloju?",
+                        "Which protocols belong to the application layer?",
                         "HTTP",
                         "SMTP",
                         "ARP",
@@ -358,95 +358,95 @@ public class DataSeeder(ApplicationDbContext context, ILogger<DataSeeder> logger
                     )
                 ]),
             Quiz(
-                categoryName: "Tehnologija",
-                title: "Web razvoj",
-                description: "HTML, CSS i HTTP osnove.",
+                categoryName: "Technology",
+                title: "Web Development",
+                description: "HTML, CSS, and HTTP basics.",
                 difficulty: Difficulty.Easy,
                 timeLimit: 8,
                 questions:
                 [
-                    SingleChoice("Skracenica HTML znaci:", "HyperText Markup Language", "High Transfer Machine Language", "Home Tool Markup Language", "Hyperlink and Text Management Language"),
-                    SingleChoice("Koja CSS osobina menja boju teksta?", "color", "background-color", "font-style", "text-shadow"),
-                    SingleChoice("HTTP status kod 404 oznacava:", "Resurs nije pronadjen", "Zabranjen pristup", "Interna greska servera", "Uspesno izvrsen zahtev")
+                    SingleChoice("What does HTML stand for?", "HyperText Markup Language", "High Transfer Machine Language", "Home Tool Markup Language", "Hyperlink and Text Management Language"),
+                    SingleChoice("Which CSS property changes text color?", "color", "background-color", "font-style", "text-shadow"),
+                    SingleChoice("HTTP status code 404 means:", "Resource not found", "Access forbidden", "Internal server error", "Request completed successfully")
                 ]),
             Quiz(
-                categoryName: "Tehnologija",
-                title: "Programiranje u C#",
-                description: "Prakticna pitanja o jeziku C# i .NET okruzenju.",
+                categoryName: "Technology",
+                title: "C# Programming",
+                description: "Practical questions about C# and the .NET ecosystem.",
                 difficulty: Difficulty.Medium,
                 timeLimit: 9,
                 questions:
                 [
-                    SingleChoice("Koja kljucna rec definise konstantu u C#?", "const", "readonly", "static", "sealed"),
-                    SingleChoice("Koja kolekcija cuva redosled ubacivanja i dozvoljava duplikate?", "List<T>", "HashSet<T>", "Dictionary<TKey,TValue>", "SortedSet<T>"),
-                    SingleChoice("Koji povratni tip se koristi za async metodu koja vraca rezultat?", "Task<T>", "void", "IEnumerable<T>", "Thread")
+                    SingleChoice("Which keyword defines a constant in C#?", "const", "readonly", "static", "sealed"),
+                    SingleChoice("Which collection preserves insertion order and allows duplicates?", "List<T>", "HashSet<T>", "Dictionary<TKey,TValue>", "SortedSet<T>"),
+                    SingleChoice("Which return type is used for an async method that returns a value?", "Task<T>", "void", "IEnumerable<T>", "Thread")
                 ]),
             Quiz(
-                categoryName: "Tehnologija",
-                title: "Bezbednost na internetu",
-                description: "Osnovna pravila digitalne bezbednosti.",
+                categoryName: "Technology",
+                title: "Internet Security",
+                description: "Basic digital safety and cybersecurity rules.",
                 difficulty: Difficulty.Hard,
                 timeLimit: 10,
                 questions:
                 [
-                    SingleChoice("Sta je 2FA?", "Dodatni korak provere identiteta", "Tip antivirusnog programa", "Metoda kompresije podataka", "Sistem za backup fajlova"),
-                    TrueFalse("Phishing poruke cesto oponasaju legitimne servise da bi ukrale podatke.", true),
-                    FillInBlank("Skracenica za dvofaktorsku autentikaciju je ___.", "2FA")
+                    SingleChoice("What is 2FA?", "An additional identity verification step", "A type of antivirus software", "A data compression method", "A file backup system"),
+                    TrueFalse("Phishing messages often imitate legitimate services to steal data.", true),
+                    FillInBlank("The abbreviation for two-factor authentication is ___.", "2FA")
                 ]),
 
             Quiz(
-                categoryName: "Sport",
-                title: "Fudbal",
-                description: "Pravila i osnovne cinjenice o fudbalu.",
+                categoryName: "Sports",
+                title: "Football",
+                description: "Rules and basic facts about football.",
                 difficulty: Difficulty.Easy,
                 timeLimit: 8,
                 questions:
                 [
-                    SingleChoice("Koliko igraca jedne ekipe je na terenu na pocetku meca?", "11", "10", "9", "12"),
-                    TrueFalse("Svetsko prvenstvo u fudbalu odrzava se na svake 4 godine.", true),
+                    SingleChoice("How many players from one team are on the field at kick-off?", "11", "10", "9", "12"),
+                    TrueFalse("The FIFA World Cup is held every 4 years.", true),
                     MultipleChoice(
-                        "Koje reprezentacije su osvajale FIFA Svetsko prvenstvo?",
+                        "Which national teams have won the FIFA World Cup?",
                         "Brazil",
-                        "Francuska",
-                        "Norveska",
+                        "France",
+                        "Norway",
                         "Japan"
                     )
                 ]),
             Quiz(
-                categoryName: "Sport",
-                title: "Kosarka",
-                description: "Osnovna pravila i termini u kosarci.",
+                categoryName: "Sports",
+                title: "Basketball",
+                description: "Basic rules and terms in basketball.",
                 difficulty: Difficulty.Easy,
                 timeLimit: 8,
                 questions:
                 [
-                    SingleChoice("Koliko minuta traje regularna NBA utakmica?", "48", "40", "60", "50"),
-                    SingleChoice("Koliko poena vredi slobodno bacanje?", "1", "2", "3", "4"),
-                    SingleChoice("FIBA linija za tri poena je udaljena priblizno:", "6.75 m", "7.24 m", "6.25 m", "5.90 m")
+                    SingleChoice("How many minutes does a regular NBA game last?", "48", "40", "60", "50"),
+                    SingleChoice("How many points is a free throw worth?", "1", "2", "3", "4"),
+                    SingleChoice("The FIBA three-point line is approximately:", "6.75 m", "7.24 m", "6.25 m", "5.90 m")
                 ]),
             Quiz(
-                categoryName: "Sport",
-                title: "Olimpijske igre",
-                description: "Istorija i simboli olimpijskog pokreta.",
+                categoryName: "Sports",
+                title: "Olympic Games",
+                description: "History and symbols of the Olympic movement.",
                 difficulty: Difficulty.Medium,
                 timeLimit: 9,
                 questions:
                 [
-                    SingleChoice("Gde su odrzane prve moderne Olimpijske igre?", "Atina", "Pariz", "London", "Rim"),
-                    SingleChoice("Koliko prstenova ima olimpijski simbol?", "5", "4", "6", "7"),
-                    SingleChoice("Zvanicni olimpijski moto je:", "Citius, Altius, Fortius", "Mens sana in corpore sano", "Veni, vidi, vici", "Carpe diem")
+                    SingleChoice("Where were the first modern Olympic Games held?", "Athens", "Paris", "London", "Rome"),
+                    SingleChoice("How many rings are in the Olympic symbol?", "5", "4", "6", "7"),
+                    SingleChoice("The official Olympic motto is:", "Citius, Altius, Fortius", "Mens sana in corpore sano", "Veni, vidi, vici", "Carpe diem")
                 ]),
             Quiz(
-                categoryName: "Sport",
-                title: "Tenis Grand Slam",
-                description: "Turniri i pravila najvaznijih teniskih takmicenja.",
+                categoryName: "Sports",
+                title: "Tennis Grand Slams",
+                description: "Tournaments and rules of major tennis competitions.",
                 difficulty: Difficulty.Medium,
                 timeLimit: 9,
                 questions:
                 [
-                    SingleChoice("Na kojoj podlozi se igra Roland Garros?", "Sljaka", "Trava", "Beton", "Tepih"),
-                    TrueFalse("U jednoj sezoni igraju se cetiri Grand Slam turnira.", true),
-                    FillInBlank("Kako se zove Grand Slam turnir koji se igra na travi u Londonu?", "Wimbledon")
+                    SingleChoice("On which surface is Roland Garros played?", "Clay", "Grass", "Hard court", "Carpet"),
+                    TrueFalse("Four Grand Slam tournaments are played in one season.", true),
+                    FillInBlank("What is the name of the Grand Slam played on grass in London?", "Wimbledon")
                 ])
         ];
     }
@@ -558,8 +558,8 @@ public class DataSeeder(ApplicationDbContext context, ILogger<DataSeeder> logger
             QuestionType.TrueFalse,
             new List<OptionSeed>
             {
-                new("Tacno", isTrue),
-                new("Netacno", !isTrue)
+                new("True", isTrue),
+                new("False", !isTrue)
             });
     }
 

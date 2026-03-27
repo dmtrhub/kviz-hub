@@ -18,7 +18,10 @@ builder.Services
 
 var app = builder.Build();
 
-await app.MigrateAndSeedDatabaseAsync();
+if (!app.Environment.IsEnvironment("Testing"))
+{
+    await app.MigrateAndSeedDatabaseAsync();
+}
 
 if (app.Environment.IsDevelopment())
 {
@@ -39,3 +42,4 @@ app.UseMiddleware<ErrorHandlerMiddleware>();
 app.MapControllers();
 
 app.Run();
+
