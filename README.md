@@ -64,31 +64,26 @@ kviz-hub/
 ## Screenshots
 
 1. **Home / Quiz Catalog**
-   - Suggested file: `docs/images/home-quiz-catalog.png`
    - Show filters and quiz cards
 
    ![Home - Quiz Catalog](docs/images/home-quiz-catalog.png)
 
 2. **Quiz Solving Screen**
-   - Suggested file: `docs/images/quiz-attempt.png`
    - Show question UI and answer selection
 
    ![Quiz Attempt](docs/images/quiz-attempt.png)
 
 3. **Results Screen**
-   - Suggested file: `docs/images/results-screen.png`
    - Show score, percentage, duration, and summary
 
    ![Results](docs/images/results-screen.png)
 
 4. **Leaderboard**
-   - Suggested file: `docs/images/leaderboard.png`
    - Show ranking table
 
    ![Leaderboard](docs/images/leaderboard.png)
 
-5. **Admin Panel (optional but recommended)**
-   - Suggested file: `docs/images/admin-panel.png`
+5. **Admin Panel**
    - Show quiz/question/category management
 
    ![Admin Panel](docs/images/admin-panel.png)
@@ -188,4 +183,6 @@ Test projects:
 
 ## License
 
-This project is for portfolio and educational use.
+This project is licensed under the [MIT License](LICENSE).
+
+You are free to use, modify, and distribute this software for any purpose, provided that you include the original copyright notice and license text.
